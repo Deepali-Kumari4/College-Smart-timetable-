@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<!-- FullCalendar -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<style>
+:root {
+    --bg-1: #f5f7fb;
+    --bg-2: #e9edf7;
+    --ink: #14213d;
+    --muted: #5b6787;
+    --side-1: #0b132b;
+    --side-2: #1c2541;
+    --accent: #2d6cdf;
+    --line: #dfe5f1;
+    --card: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+        radial-gradient(circle at 18% 22%, #ffffff 0%, rgba(255,255,255,0) 35%),
+        radial-gradient(circle at 82% 2%, #edf2ff 0%, rgba(237,242,255,0) 28%),
+        linear-gradient(120deg, var(--bg-1), var(--bg-2));
+    color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout { display: flex; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 78px;
+    background: linear-gradient(175deg, var(--side-1), var(--side-2));
+    color: white;
+    height: 100vh;
+    position: fixed;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    box-shadow: 10px 0 30px rgba(3, 7, 18, 0.2);
+    border-right: 1px solid rgba(148, 163, 184, 0.2);
+}
+.sidebar.expanded { width: 260px; }
+
+.sidebar-header {
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar-profile {
+    margin: 12px 10px 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px rgba(31, 90, 204, 0.3);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.sidebar-profile-meta {
+    min-width: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.expanded .sidebar-profile-meta {
+    opacity: 1;
+}
+
+.sidebar-profile-meta .name {
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-profile-meta .dept {
+    color: #b9c6ef;
+    font-size: 11px;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #d8e1ff;
+    padding: 14px 18px;
+    margin: 8px 10px;
+    border-radius: 12px;
+    transition: 0.22s ease;
+    white-space: nowrap;
+}
+.sidebar a:hover {
+    background: rgba(89, 134, 255, 0.2);
+    color: white;
+}
+.sidebar a.active {
+    background: linear-gradient(90deg, rgba(45,108,223,0.85), rgba(84,122,255,0.95));
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(45,108,223,0.25);
+}
+.sidebar svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+    margin-right: 15px;
+    min-width: 20px;
+}
+.sidebar span {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-weight: 500;
+}
+.sidebar.expanded span { opacity: 1; }
+
+/* ===== MAIN ===== */
+.main {
+    margin-left: 78px;
+    padding: 26px 28px 40px 28px;
+    flex: 1;
+    transition: margin-left 0.3s ease;
+}
+.main.shifted { margin-left: 260px; }
+
+.top-bar {
+    position: relative;
+    top: auto;
+    z-index: 20;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.top-brand h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 0.2px;
+}
+
+.top-brand p {
+    margin: 2px 0 0 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.top-brand .live-date {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #eaf7ff;
+    color: #0f5e84;
+    border: 1px solid #c8e7f6;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.top-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eef4ff;
+    color: #1747a6;
+    border: 1px solid #cfe0ff;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid #d4deee;
+    border-radius: 999px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.profile-chip .avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+}
+
+.profile-chip .meta {
+    line-height: 1.1;
+}
+
+.profile-chip .meta .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.profile-chip .meta .role {
+    font-size: 10px;
+    color: #64748b;
+}
+
+/* ===== SECTION CONTROL ===== */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ===== CARD ===== */
+.card {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    margin-bottom: 30px;
+}
+
+.dashboard-shell {
+    display: grid;
+    gap: 22px;
+}
+
+.overview-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #d7e4fb;
+    background:
+        radial-gradient(circle at 90% 10%, rgba(127, 170, 255, 0.22), rgba(127, 170, 255, 0)),
+        radial-gradient(circle at 10% 110%, rgba(68, 130, 246, 0.18), rgba(68, 130, 246, 0)),
+        linear-gradient(120deg, #ffffff, #f6faff);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.overview-card::after {
+    content: "";
+    position: absolute;
+    right: -48px;
+    top: -48px;
+    width: 170px;
+    height: 170px;
+    background: radial-gradient(circle, rgba(45, 108, 223, 0.18), rgba(45, 108, 223, 0));
+    pointer-events: none;
+}
+
+.overview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.overview-header h3 {
+    margin: 0;
+    font-size: 31px;
+    letter-spacing: -0.4px;
+}
+
+.overview-sub {
+    margin: 8px 0 0 0;
+    color: #506080;
+    font-size: 14px;
+    max-width: 680px;
+    line-height: 1.6;
+}
+
+.overview-pill {
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1f4297;
+    border: 1px solid #cfe0ff;
+    background: #eef4ff;
+    border-radius: 999px;
+    padding: 8px 12px;
+}
+
+.overview-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.kpi-card {
+    border: 1px solid #dbe7fb;
+    border-radius: 12px;
+    padding: 12px 13px;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #61739a;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #12264f;
+    line-height: 1;
+}
+
+.kpi-meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #42547a;
+}
+
+.today-card {
+    border: 1px solid #dbe4f5;
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+}
+
+.today-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.today-head h3 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: -0.3px;
+}
+
+.today-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1f4297;
+    border-radius: 999px;
+    border: 1px solid #d2e1ff;
+    background: #eef4ff;
+    padding: 6px 10px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.empty-note {
+    border: 1px dashed #cbdaf2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fbfdff, #f4f8ff);
+    color: #4c628e;
+    padding: 14px;
+    font-size: 14px;
+}
+
+/* ===== TABLE ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th {
+    background: #f5f7fc;
+    padding: 12px;
+    font-size: 14px;
+    text-align: left;
+}
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.tt-day-card {
+    border: 1px solid #dfe7f6;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+    box-shadow: 0 8px 20px rgba(18, 33, 77, 0.04);
+}
+
+.tt-day-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.tt-day-head h4 {
+    margin: 0;
+    color: #182540;
+    font-size: 16px;
+}
+
+.tt-count {
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #e9f0ff;
+    color: #1e429f;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tt-list {
+    display: grid;
+    gap: 8px;
+}
+
+.tt-item {
+    border: 1px solid #e3e9f5;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #fff;
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.tt-slot {
+    border-radius: 8px;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f2f74;
+    background: #e8f0ff;
+}
+
+.tt-subject {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.tt-meta {
+    font-size: 12px;
+    color: #4a5a7a;
+}
+
+.chip {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.filter-wrap {
+    background: #f8fafe;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.filter-label {
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    min-width: 220px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid #cfd8eb;
+    background: #fff;
+    color: #1e293b;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.filter-btn {
+    border: none;
+    border-radius: 8px;
+    background: #dde6f7;
+    color: #1e293b;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.filter-count {
+    font-size: 12px;
+    color: #334155;
+    background: #e7efff;
+    border-radius: 30px;
+    padding: 4px 10px;
+}
+
+.profile-panel {
+    display: none;
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    width: 280px;
+    z-index: 200;
+    background: #fff;
+    border: 1px solid #dfe5f1;
+    border-radius: 12px;
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.16);
+    padding: 14px;
+}
+
+.profile-panel.show {
+    display: block;
+}
+
+.profile-panel h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.profile-row {
+    font-size: 13px;
+    color: #334155;
+    margin: 6px 0;
+}
+
+.profile-panel label {
+    display: block;
+    font-size: 12px;
+    color: #475569;
+    margin-top: 8px;
+}
+
+.profile-panel input,
+.profile-panel select {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 9px;
+    border-radius: 8px;
+    border: 1px solid #d2daeb;
+}
+
+.profile-panel button {
+    margin-top: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: #2d6cdf;
+    color: #fff;
+    padding: 9px 10px;
+    cursor: pointer;
+}
+
+.profile-erp {
+    padding: 0;
+    overflow: hidden;
+}
+
+.profile-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255,255,255,0.65), rgba(255,255,255,0)),
+        linear-gradient(90deg, #edf3ff, #e2ecff);
+    border-bottom: 1px solid #d7e3fb;
+}
+
+.profile-hero h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.profile-hero p {
+    margin: 4px 0 0 0;
+    color: #4b5f8f;
+    font-size: 13px;
+}
+
+.profile-main {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 18px;
+    padding: 18px;
+}
+
+.profile-side {
+    border: 1px solid #e0e8f6;
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 14px;
+}
+
+.profile-avatar-lg {
+    width: 94px;
+    height: 94px;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 34px;
+    box-shadow: 0 12px 24px rgba(45, 108, 223, 0.25);
+    overflow: hidden;
+}
+
+.profile-avatar-lg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-side .meta-line {
+    font-size: 13px;
+    color: #334155;
+    margin: 7px 0;
+}
+
+.profile-form {
+    border: 1px solid #e0e8f6;
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.profile-form-grid .full {
+    grid-column: 1 / -1;
+}
+
+.profile-form label {
+    display: block;
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 5px;
+}
+
+.profile-form input,
+.profile-form select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #d0dbef;
+    font-family: 'Space Grotesk', sans-serif;
+    box-sizing: border-box;
+}
+
+.profile-form input:focus,
+.profile-form select:focus {
+    outline: none;
+    border-color: #2d6cdf;
+    box-shadow: 0 0 0 3px rgba(45,108,223,0.15);
+}
+
+.profile-form .submit-btn {
+    margin-top: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    background: linear-gradient(90deg, #2d6cdf, #4d83f6);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-event-card {
+    border: 1px solid #dce6f7;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    padding: 12px;
+}
+
+.calendar-event-card.is-hidden {
+    display: none;
+}
+
+.calendar-event-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    color: #1a2c50;
+}
+
+.calendar-event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+}
+
+.calendar-event-item {
+    border: 1px solid #e1e8f6;
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px 10px;
+}
+
+.calendar-event-item .k {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.calendar-event-item .v {
+    margin-top: 2px;
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.calendar-workspace {
+    border: 1px solid #d7e3f5;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+    padding: 16px;
+}
+
+.calendar-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.calendar-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.calendar-head h3 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.4px;
+}
+
+.calendar-head p {
+    margin: 5px 0 0 0;
+    color: #4f638d;
+    font-size: 13px;
+}
+
+.calendar-chip {
+    white-space: nowrap;
+    border: 1px solid #b6dff0;
+    background: #e9f7fd;
+    color: #0f5e84;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+#calendarUI {
+    border: 1px solid #d6e0ef;
+    border-radius: 16px;
+    background: #fff;
+    padding: 10px;
+    min-width: 0;
+}
+
+#calendarUI .fc {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+#calendarUI .fc-toolbar-title {
+    font-size: clamp(20px, 3vw, 30px);
+    color: #15223a;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+}
+
+#calendarUI .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+#calendarUI .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#calendarUI .fc-toolbar-chunk:nth-child(2) {
+    justify-content: center;
+    min-width: 0;
+}
+
+#calendarUI .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+}
+
+#calendarUI .fc-button {
+    border: 1px solid #bedef1 !important;
+    background: linear-gradient(90deg, #16a8df, #1497d2) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+    box-shadow: none !important;
+}
+
+#calendarUI .fc-button-group {
+    display: inline-flex !important;
+    gap: 8px;
+}
+
+#calendarUI .fc-button-group > .fc-button {
+    margin: 0 !important;
+    margin-left: 8px !important;
+    border-radius: 10px !important;
+}
+
+#calendarUI .fc-button-group > .fc-button:first-child {
+    margin-left: 0 !important;
+}
+
+#calendarUI .fc-button:hover {
+    filter: brightness(1.04);
+}
+
+#calendarUI .fc-button:disabled {
+    opacity: 0.65 !important;
+}
+
+@media (max-width: 980px) {
+    #calendarUI .fc-toolbar.fc-header-toolbar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    #calendarUI .fc-toolbar-chunk {
+        justify-content: center !important;
+        flex-wrap: wrap;
+    }
+}
+
+#calendarUI .fc-col-header {
+    border: none !important;
+}
+
+#calendarUI .fc-col-header-cell {
+    border: none !important;
+    background: linear-gradient(90deg, #16ace0, #1496d1);
+}
+
+#calendarUI .fc-col-header-cell:first-child {
+    border-radius: 999px 0 0 999px;
+}
+
+#calendarUI .fc-col-header-cell:last-child {
+    border-radius: 0 999px 999px 0;
+}
+
+#calendarUI .fc .fc-daygrid-day.fc-day-today {
+    background: #e8f6ff !important;
+}
+
+#calendarUI .fc-daygrid-day-frame {
+    min-height: 76px;
+}
+
+#calendarUI .fc-col-header-cell-cushion {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fdff;
+    padding: 9px 0;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+#calendarUI .fc-daygrid-day-number {
+    color: #2b2f37;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+#calendarUI .fc-event {
+    border: none !important;
+    border-left: 3px solid #0877ab !important;
+    border-radius: 6px !important;
+    background: #e8f7ff !important;
+    color: #0d5f87 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+}
+
+#calendarUI .fc-event-title,
+#calendarUI .fc-event-main-frame,
+#calendarUI .fc-event-title-container {
+    text-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+#calendarUI .fc-event.is-important {
+    border-left-color: #d97706 !important;
+    background: #fff1dd !important;
+    color: #9a3412 !important;
+}
+
+#calendarUI .fc-event.is-government-holiday {
+    border-left-color: #0f766e !important;
+    background: #dcfdf7 !important;
+    color: #0f766e !important;
+}
+
+#calendarUI .fc-theme-standard td,
+#calendarUI .fc-theme-standard th {
+    border-color: #e3e9f3 !important;
+}
+
+.calendar-side-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.holiday-stream {
+    border: 1px dashed #9ecadd;
+    border-radius: 12px;
+    padding: 12px;
+    background: linear-gradient(180deg, #f9fdff, #f3fbff);
+}
+
+.holiday-stream h4 {
+    margin: 0 0 9px 0;
+    font-size: 15px;
+    color: #0f5e84;
+}
+
+.holiday-list {
+    display: grid;
+    gap: 8px;
+    max-height: 300px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.holiday-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #d5e8f3;
+    border-radius: 10px;
+    padding: 8px 9px;
+    background: #ffffff;
+}
+
+.holiday-date {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #e8f7ff;
+    color: #0d5f87;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.holiday-title {
+    font-size: 13px;
+    color: #1d334d;
+    font-weight: 700;
+}
+
+.holiday-empty {
+    border: 1px dashed #e6d1b1;
+    border-radius: 10px;
+    padding: 11px;
+    background: #fffdf8;
+    color: #85613c;
+    font-size: 13px;
+}
+
+.calendar-action-row {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.calendar-action-msg {
+    font-size: 12px;
+    color: #1f4297;
+}
+
+.calendar-add-btn {
+    border: 1px solid #bedef1;
+    background: linear-gradient(90deg, #16a8df, #1497d2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-add-btn:hover {
+    filter: brightness(1.03);
+}
+
+.student-event-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 14, 32, 0.52);
+    backdrop-filter: blur(2px);
+    z-index: 260;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.student-event-modal-overlay.show {
+    display: flex;
+}
+
+.student-event-modal {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 14px;
+    border: 1px solid #d7e2f8;
+    background: #fff;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.28);
+    overflow: hidden;
+}
+
+.student-event-modal-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid #dde6f8;
+    background: linear-gradient(90deg, #edf3ff, #e1ebff);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-event-modal-head h4 {
+    margin: 0;
+    font-size: 17px;
+    color: #18294d;
+}
+
+.student-event-modal-close {
+    border: none;
+    background: #fff;
+    color: #334155;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.student-event-modal-body {
+    padding: 14px 16px 16px 16px;
+}
+
+.student-event-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.student-event-grid .full {
+    grid-column: 1 / -1;
+}
+
+.student-event-grid label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.student-event-grid input,
+.student-event-grid select {
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    border-radius: 9px;
+    border: 1px solid #cfdaef;
+    font-family: 'Space Grotesk', sans-serif;
+    box-sizing: border-box;
+}
+
+.student-event-grid input:focus,
+.student-event-grid select:focus {
+    outline: none;
+    border-color: #2d6cdf;
+    box-shadow: 0 0 0 3px rgba(45,108,223,0.14);
+}
+
+.student-color-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px;
+    border: 1px solid #d8e2f2;
+    border-radius: 10px;
+    background: #f8fbff;
+}
+
+.student-color-chip {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.15);
+    cursor: pointer;
+}
+
+.student-color-chip.active {
+    box-shadow: 0 0 0 2px rgba(45, 108, 223, 0.65), 0 4px 12px rgba(45, 108, 223, 0.25);
+}
+
+.student-color-auto {
+    border: 1px solid #ccd7eb;
+    background: #fff;
+    color: #334155;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.student-color-auto.active {
+    border-color: #2d6cdf;
+    color: #1e429f;
+    background: #ecf3ff;
+}
+
+.student-event-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.student-event-actions-right {
+    display: flex;
+    gap: 8px;
+}
+
+.student-danger-btn {
+    border: none;
+    border-radius: 9px;
+    background: #b42318;
+    color: #fff;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.student-light-btn {
+    border: 1px solid #d4deee;
+    border-radius: 9px;
+    background: #fff;
+    color: #334155;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+@media (max-width: 860px) {
+    .overview-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .overview-header h3,
+    .today-head h3 {
+        font-size: 24px;
+    }
+    .overview-kpis {
+        grid-template-columns: 1fr;
+    }
+    .profile-main {
+        grid-template-columns: 1fr;
+    }
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .calendar-main-grid {
+        grid-template-columns: 1fr;
+    }
+    .calendar-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .calendar-head h3 {
+        font-size: 24px;
+    }
+    .calendar-side-grid {
+        grid-template-columns: 1fr;
+    }
+    .student-event-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+
+    <div class="sidebar-header" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+    </div>
+
+    <div class="sidebar-profile" onclick="openProfileSection(event)">
+        <div class="avatar">
+            {% if student_profile_pic %}
+            <img src="{{ url_for('static', filename=student_profile_pic) }}" alt="Profile">
+            {% else %}
+            {{ student_name[:1] | upper }}
+            {% endif %}
+        </div>
+        <div class="sidebar-profile-meta">
+            <div class="name">{{ student_name }}</div>
+            <div class="dept">{{ student_department }} Student</div>
+        </div>
+    </div>
+
+    <a href="#" class="nav-link active" data-section="dashboard" onclick="showSection('dashboard', this)">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="timetable" onclick="showSection('timetable', this)">
+        <i data-lucide="calendar"></i>
+        <span>My Timetable</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="institute-timetable" onclick="showSection('institute-timetable', this)">
+        <i data-lucide="building-2"></i>
+        <span>Institute Timetable</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="calendar" onclick="showSection('calendar', this)">
+        <i data-lucide="calendar-days"></i>
+        <span>Academic Calendar</span>
+    </a>
+
+    <a href="/logout">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+    </a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+    <div class="top-bar">
+        <div class="top-brand">
+            <h1 id="liveWelcomeTitle">Welcome, {{ student_name }}</h1>
+            <p id="liveWorkspaceLine">
+                SmartTimetable Student Workspace
+                <span id="liveHeaderDate" class="live-date"></span>
+            </p>
+        </div>
+        <div class="top-right">
+            <div class="top-pill" id="livePortalPill">
+                <i data-lucide="graduation-cap"></i>
+                {{ student_department }} | Academic Portal
+            </div>
+            <div class="profile-chip" onclick="openProfileSection(event)">
+                <div class="avatar">
+                    {% if student_profile_pic %}
+                    <img src="{{ url_for('static', filename=student_profile_pic) }}" alt="Profile">
+                    {% else %}
+                    {{ student_name[:1] | upper }}
+                    {% endif %}
+                </div>
+                <div class="meta">
+                    <div class="name">{{ student_name }}</div>
+                    <div class="role">Student</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="profile" class="section">
+        <div class="card profile-erp">
+            <div class="profile-hero">
+                <div>
+                    <h3>My Profile</h3>
+                    <p>Manage your student identity and account settings</p>
+                </div>
+                <div class="top-pill">
+                    <i data-lucide="sparkles"></i>
+                    Student ERP Profile
+                </div>
+            </div>
+
+            <div class="profile-main">
+                <div class="profile-side">
+                    <div class="profile-avatar-lg">
+                        {% if student_profile_pic %}
+                        <img src="{{ url_for('static', filename=student_profile_pic) }}" alt="Profile">
+                        {% else %}
+                        {{ student_name[:1] | upper }}
+                        {% endif %}
+                    </div>
+                    <div class="meta-line"><b>Name:</b> {{ student_name }}</div>
+                    <div class="meta-line"><b>Email:</b> {{ student_email }}</div>
+                    <div class="meta-line"><b>Role:</b> Student</div>
+                    <div class="meta-line"><b>Department:</b> {{ student_department }}</div>
+                </div>
+
+                <form class="profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
+                    <div class="profile-form-grid">
+                        <div class="full">
+                            <label>Name</label>
+                            <input type="text" name="name" value="{{ student_name }}" required>
+                        </div>
+
+                        <div>
+                            <label>Department</label>
+                            <select name="department">
+                                <option {% if student_department == 'ALL' %}selected{% endif %}>ALL</option>
+                                <option {% if student_department == 'CSE' %}selected{% endif %}>CSE</option>
+                                <option {% if student_department == 'ECE' %}selected{% endif %}>ECE</option>
+                                <option {% if student_department == 'IT' %}selected{% endif %}>IT</option>
+                                <option {% if student_department == 'ME' %}selected{% endif %}>ME</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Profile Picture</label>
+                            <input type="file" name="profile_pic" accept="image/*">
+                        </div>
+                    </div>
+                    <button class="submit-btn" type="submit">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+        <div class="dashboard-shell">
+        <div class="card overview-card">
+            <div class="overview-header">
+                <div>
+                    <h3>Student Command Center</h3>
+                    <p class="overview-sub">Track today's learning load, stay aligned with your department schedule, and keep your academic calendar in sync from one place.</p>
+                </div>
+                <span class="overview-pill">{{ today_name }} Briefing</span>
+            </div>
+            <div class="overview-kpis">
+                <div class="kpi-card">
+                    <div class="kpi-label">Department</div>
+                    <div class="kpi-value">{{ student_department }}</div>
+                    <div class="kpi-meta">Active academic stream</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">My Timetable</div>
+                    <div class="kpi-value">{{ my_timetable | length }}</div>
+                    <div class="kpi-meta">Total classes mapped</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Today's Classes</div>
+                    <div class="kpi-value">{{ my_today | length }}</div>
+                    <div class="kpi-meta">For your branch</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card today-card">
+            <div class="today-head">
+                <h3>My Classes Today ({{ today_name }})</h3>
+                <span class="today-badge">{{ my_today | length }} scheduled</span>
+            </div>
+            {% if my_today %}
+            <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Slot</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Room</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in my_today %}
+                    <tr>
+                        <td>{{ row.slot }}</td>
+                        <td>{{ row.subject }}</td>
+                        <td>{{ row.teacher }}</td>
+                        <td>{{ row.room }}</td>
+                        <td>{{ row.label if row.label else "-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="empty-note">No classes are scheduled today for your branch. Use the Institute Timetable tab to explore other department sessions.</div>
+            {% endif %}
+        </div>
+
+        <div class="card today-card">
+            <div class="today-head">
+                <h3>Institute Classes Today ({{ today_name }})</h3>
+                <span class="today-badge">{{ institute_today | length }} active</span>
+            </div>
+            {% if institute_today %}
+            <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Slot</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Room</th>
+                        <th>Target</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in institute_today %}
+                    <tr>
+                        <td>{{ row.slot }}</td>
+                        <td>{{ row.subject }}</td>
+                        <td>{{ row.teacher }}</td>
+                        <td>{{ row.room }}</td>
+                        <td>{{ row.target }}</td>
+                        <td>{{ row.label if row.label else "-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="empty-note">No institute-wide classes are scheduled today.</div>
+            {% endif %}
+        </div>
+        </div>
+    </div>
+
+    <!-- TIMETABLE -->
+    <div id="timetable" class="section">
+        <div class="card">
+            <h3>Your Timetable</h3>
+
+            <div id="myTimetableSummary"></div>
+        </div>
+    </div>
+
+    <!-- INSTITUTE TIMETABLE -->
+    <div id="institute-timetable" class="section">
+        <div class="card">
+            <h3>Institute Timetable</h3>
+            <div class="filter-wrap">
+                <label class="filter-label">Filter by Department</label>
+                <div class="filter-row">
+                    <select id="deptFilter" class="filter-select">
+                        <option value="ALL">All Departments</option>
+                    </select>
+                    <select id="dayFilter" class="filter-select">
+                        <option value="ALL">All Days</option>
+                        <option value="Mon">Monday</option>
+                        <option value="Tue">Tuesday</option>
+                        <option value="Wed">Wednesday</option>
+                        <option value="Thu">Thursday</option>
+                        <option value="Fri">Friday</option>
+                    </select>
+                    <button id="clearDeptFilter" class="filter-btn" type="button">Reset</button>
+                    <span id="filterCount" class="filter-count">Showing 0 classes</span>
+                </div>
+            </div>
+
+            <div id="instituteTimetableSummary"></div>
+        </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="calendar" class="section">
+        <div class="card">
+            <div class="calendar-workspace">
+            <div class="calendar-head">
+                <div>
+                    <h3>Academic Calendar</h3>
+                    <p>Track institute milestones, celebration days, and class-impacting notices in one place.</p>
+                </div>
+                <span class="calendar-chip">{{ vacations | length }} upcoming highlights</span>
+            </div>
+            <div class="calendar-action-row">
+                <div id="studentCalendarActionMsg" class="calendar-action-msg"></div>
+                <button type="button" class="calendar-add-btn" onclick="openStudentEventModal('add', { date: '' })">Add Event</button>
+            </div>
+            <div class="calendar-main-grid">
+                <div id="calendarUI"></div>
+                <div class="calendar-side-grid">
+                    <div class="holiday-stream">
+                        <h4>Upcoming Celebration Days & Official Holidays</h4>
+                        {% if vacations %}
+                        <div class="holiday-list">
+                            {% for v in vacations %}
+                            <div class="holiday-item">
+                                <span class="holiday-date">{{ v.date }}</span>
+                                <span class="holiday-title">{{ v.title }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="holiday-empty">No holiday or leave announcements available at the moment.</div>
+                        {% endif %}
+                    </div>
+                    <div id="studentEventDetails" class="calendar-event-card is-hidden"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="student-event-modal-overlay" id="studentEventModalOverlay">
+    <div class="student-event-modal">
+        <div class="student-event-modal-head">
+            <h4 id="studentEventModalTitle">Add Event</h4>
+            <button type="button" class="student-event-modal-close" onclick="closeStudentEventModal()">x</button>
+        </div>
+        <div class="student-event-modal-body">
+            <div class="student-event-grid">
+                <div class="full">
+                    <label for="studentEventName">Event Title</label>
+                    <input id="studentEventName" type="text" placeholder="e.g. Study Sprint, Project Review">
+                </div>
+                <div class="full">
+                    <label for="studentEventSubject">Subject</label>
+                    <input id="studentEventSubject" type="text" placeholder="e.g. Embedded Systems">
+                </div>
+                <div>
+                    <label for="studentEventDate">Date</label>
+                    <input id="studentEventDate" type="date">
+                </div>
+                <div>
+                    <label for="studentEventType">Type</label>
+                    <select id="studentEventType">
+                        <option value="general">General</option>
+                        <option value="test">Test</option>
+                        <option value="exam">Exam</option>
+                    </select>
+                </div>
+                <div class="full">
+                    <label for="studentEventImportant">Priority</label>
+                    <select id="studentEventImportant">
+                        <option value="no">Normal</option>
+                        <option value="yes">Important</option>
+                    </select>
+                </div>
+                <div class="full">
+                    <label>Event Label Color</label>
+                    <div class="student-color-picker" id="studentEventColorPicker">
+                        <button type="button" class="student-color-auto active" id="studentColorAutoBtn" onclick="selectStudentEventColor('')">Auto by Type</button>
+                        <button type="button" class="student-color-chip" data-color="#2563eb" style="background:#2563eb;" onclick="selectStudentEventColor('#2563eb')"></button>
+                        <button type="button" class="student-color-chip" data-color="#0f766e" style="background:#0f766e;" onclick="selectStudentEventColor('#0f766e')"></button>
+                        <button type="button" class="student-color-chip" data-color="#047857" style="background:#047857;" onclick="selectStudentEventColor('#047857')"></button>
+                        <button type="button" class="student-color-chip" data-color="#b45309" style="background:#b45309;" onclick="selectStudentEventColor('#b45309')"></button>
+                        <button type="button" class="student-color-chip" data-color="#c2410c" style="background:#c2410c;" onclick="selectStudentEventColor('#c2410c')"></button>
+                        <button type="button" class="student-color-chip" data-color="#9f1239" style="background:#9f1239;" onclick="selectStudentEventColor('#9f1239')"></button>
+                        <button type="button" class="student-color-chip" data-color="#6d28d9" style="background:#6d28d9;" onclick="selectStudentEventColor('#6d28d9')"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="student-event-actions">
+                <button type="button" class="student-danger-btn" id="studentEventDeleteBtn" style="display:none;" onclick="deleteStudentEvent()">Delete Event</button>
+                <div class="student-event-actions-right">
+                    <button type="button" class="student-light-btn" onclick="closeStudentEventModal()">Cancel</button>
+                    <button type="button" class="calendar-add-btn" onclick="saveStudentEvent()">Save Event</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="studentMyRowsData" type="application/json">{{ my_timetable | tojson }}</script>
+<script id="studentInstituteRowsData" type="application/json">{{ institute_timetable | tojson }}</script>
+<script>
+
+let calendar = null;
+let calendarInitialized = false;
+const dayOrder = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 };
+const slotOrder = { S1: 1, S2: 2, S3: 3, S4: 4 };
+const fullDayName = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday" };
+const myTimetableRows = JSON.parse(document.getElementById("studentMyRowsData").textContent || "[]");
+const instituteRows = JSON.parse(document.getElementById("studentInstituteRowsData").textContent || "[]");
+let studentEventMode = "add";
+let studentEditingEventId = "";
+let studentEventLabelColor = "";
+const studentDisplayName = "{{ student_name }}";
+const studentDeptName = "{{ student_department }}";
+
+function updateLiveStudentHeader() {
+    const now = new Date();
+    const hr = now.getHours();
+    let part = "Evening";
+    if (hr < 12) part = "Morning";
+    else if (hr < 17) part = "Afternoon";
+
+    const title = document.getElementById("liveWelcomeTitle");
+    const line = document.getElementById("liveWorkspaceLine");
+    const pill = document.getElementById("livePortalPill");
+    if (title) title.textContent = `Good ${part}, ${studentDisplayName}`;
+    if (line) {
+        line.innerHTML = `SmartTimetable Student Workspace · ${part} Focus <span id="liveHeaderDate" class="live-date"></span>`;
+    }
+    if (pill) pill.innerHTML = `<i data-lucide="graduation-cap"></i>${studentDeptName} | Academic Portal · ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    const dateTag = document.getElementById("liveHeaderDate");
+    if (dateTag) {
+        dateTag.textContent = now.toLocaleDateString([], {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    }
+    lucide.createIcons();
+}
+
+function applyReadableEventStyle(eventEl) {
+    if (!eventEl) return;
+    const bg = window.getComputedStyle(eventEl).backgroundColor || "";
+    const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return;
+    const r = parseInt(m[1], 10) / 255;
+    const g = parseInt(m[2], 10) / 255;
+    const b = parseInt(m[3], 10) / 255;
+    const luminance = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+    const textColor = luminance > 0.6 ? "#1f2937" : "#ffffff";
+    eventEl.style.setProperty("--fc-event-text-color", textColor);
+    eventEl.style.color = textColor;
+    eventEl.style.textShadow = "none";
+    eventEl.style.fontWeight = "700";
+    eventEl.querySelectorAll(".fc-event-title, .fc-event-time, .fc-event-main-frame, .fc-event-title-container").forEach((node) => {
+        node.style.color = textColor;
+        node.style.textShadow = "none";
+        node.style.fontWeight = "700";
+        node.style.opacity = "1";
+    });
+}
+
+function sortRows(rows) {
+    return rows.slice().sort((a, b) => {
+        const d = (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99);
+        if (d !== 0) return d;
+        return (slotOrder[a.slot] || 99) - (slotOrder[b.slot] || 99);
+    });
+}
+
+function groupByDay(rows) {
+    const groups = {};
+    sortRows(rows).forEach(r => {
+        if (!groups[r.day]) groups[r.day] = [];
+        groups[r.day].push(r);
+    });
+    return groups;
+}
+
+function renderSummary(containerId, rows, type) {
+    const container = document.getElementById(containerId);
+    if (!rows.length) {
+        container.innerHTML = "<p style='color:#64748b;'>No timetable available.</p>";
+        return;
+    }
+
+    const grouped = groupByDay(rows);
+    const orderedDays = Object.keys(grouped).sort((a, b) => (dayOrder[a] || 99) - (dayOrder[b] || 99));
+    let html = "";
+
+    orderedDays.forEach(day => {
+        const sentence = type === "my"
+            ? `On ${fullDayName[day] || day}, in your timetable you have:`
+            : `On ${fullDayName[day] || day}, in institute timetable there are:`;
+
+        html += `<div class="tt-day-card">
+                    <div class="tt-day-head">
+                        <h4>${sentence}</h4>
+                        <span class="tt-count">${grouped[day].length} class(es)</span>
+                    </div>
+                    <div class="tt-list">`;
+        grouped[day].forEach(r => {
+            const label = r.label ? `<span class="chip">${r.label}</span>` : "";
+            const target = type === "institute" ? ` | Dept: ${r.target}` : "";
+            html += `<div class="tt-item">
+                        <div class="tt-slot">${r.slot}</div>
+                        <div>
+                            <div class="tt-subject">${r.subject}${label}</div>
+                            <div class="tt-meta">${r.teacher} | Room ${r.room}${target}</div>
+                        </div>
+                    </div>`;
+        });
+        html += "</div></div>";
+    });
+
+    container.innerHTML = html;
+}
+
+function initDeptFilter() {
+    const deptFilter = document.getElementById("deptFilter");
+    const dayFilter = document.getElementById("dayFilter");
+    const clearBtn = document.getElementById("clearDeptFilter");
+    const countTag = document.getElementById("filterCount");
+    if (!deptFilter || !dayFilter || !clearBtn || !countTag) return;
+    const depts = [...new Set(instituteRows.map(r => (r.target || "ALL").toUpperCase()))].sort();
+    depts.forEach(d => {
+        if (d === "ALL") return;
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        deptFilter.appendChild(opt);
+    });
+
+    function applyFilter() {
+        const deptVal = deptFilter.value;
+        const dayVal = dayFilter.value;
+        const rows = instituteRows.filter((r) => {
+            const matchDept = deptVal === "ALL" || (r.target || "ALL").toUpperCase() === deptVal;
+            const matchDay = dayVal === "ALL" || (r.day || "") === dayVal;
+            return matchDept && matchDay;
+        });
+        renderSummary("instituteTimetableSummary", rows, "institute");
+        countTag.textContent = `Showing ${rows.length} classes`;
+    }
+
+    deptFilter.onchange = applyFilter;
+    dayFilter.onchange = applyFilter;
+    clearBtn.onclick = () => {
+        deptFilter.value = "ALL";
+        dayFilter.value = "ALL";
+        applyFilter();
+    };
+
+    applyFilter();
+}
+
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("expanded");
+    document.getElementById("main").classList.toggle("shifted");
+}
+
+function setStudentCalendarMessage(message, tone = "info") {
+    const msg = document.getElementById("studentCalendarActionMsg");
+    if (!msg) return;
+    msg.textContent = message || "";
+    msg.style.color = tone === "error" ? "#b42318" : "#1e429f";
+}
+
+function selectStudentEventColor(color) {
+    studentEventLabelColor = color || "";
+    const autoBtn = document.getElementById("studentColorAutoBtn");
+    const chips = document.querySelectorAll("#studentEventColorPicker .student-color-chip");
+    if (autoBtn) autoBtn.classList.toggle("active", !studentEventLabelColor);
+    chips.forEach(chip => {
+        chip.classList.toggle("active", chip.dataset.color === studentEventLabelColor);
+    });
+}
+
+function openStudentEventModal(mode, data = {}) {
+    studentEventMode = mode;
+    studentEditingEventId = data.id || "";
+    document.getElementById("studentEventModalTitle").textContent = mode === "edit" ? "Edit Event" : "Add Event";
+    document.getElementById("studentEventName").value = data.title || "";
+    document.getElementById("studentEventSubject").value = data.subject || "";
+    document.getElementById("studentEventDate").value = data.date || "";
+    document.getElementById("studentEventType").value = data.type || "general";
+    document.getElementById("studentEventImportant").value = data.important ? "yes" : "no";
+    selectStudentEventColor(data.customColor || "");
+    document.getElementById("studentEventDeleteBtn").style.display = mode === "edit" ? "inline-block" : "none";
+    document.getElementById("studentEventModalOverlay").classList.add("show");
+}
+
+function closeStudentEventModal() {
+    document.getElementById("studentEventModalOverlay").classList.remove("show");
+}
+
+function saveStudentEvent() {
+    const title = document.getElementById("studentEventName").value.trim();
+    const subject = document.getElementById("studentEventSubject").value.trim();
+    const date = document.getElementById("studentEventDate").value;
+    const eventType = document.getElementById("studentEventType").value;
+    const important = document.getElementById("studentEventImportant").value;
+
+    if (!title || !date) {
+        setStudentCalendarMessage("Please provide event title and date.", "error");
+        return;
+    }
+
+    const endpoint = studentEventMode === "edit" ? "/student/update_event" : "/student/add_event";
+    let body = `title=${encodeURIComponent(title)}&subject=${encodeURIComponent(subject)}&date=${encodeURIComponent(date)}&event_type=${encodeURIComponent(eventType)}&important=${encodeURIComponent(important)}&label_color=${encodeURIComponent(studentEventLabelColor)}`;
+    if (studentEventMode === "edit") {
+        body = `id=${encodeURIComponent(studentEditingEventId)}&` + body;
+    }
+
+    fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+    }).then(async (res) => {
+        if (!res.ok) {
+            const msg = (await res.text()) || "Unable to save calendar event.";
+            throw new Error(msg);
+        }
+        closeStudentEventModal();
+        setStudentCalendarMessage("Calendar event saved.");
+        if (calendar) calendar.refetchEvents();
+    }).catch((err) => {
+        setStudentCalendarMessage(err.message || "No more than 3 events are allowed on this date.", "error");
+    });
+}
+
+function deleteStudentEvent() {
+    if (!studentEditingEventId) return;
+    fetch("/student/delete_event", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `id=${encodeURIComponent(studentEditingEventId)}`
+    }).then(() => {
+        closeStudentEventModal();
+        setStudentCalendarMessage("Event deleted.");
+        if (calendar) calendar.refetchEvents();
+    });
+}
+
+function renderStudentEventInsights(info) {
+    const ext = info.event.extendedProps || {};
+    const subject = ext.subject || info.event.title || "-";
+    const createdBy = ext.creator_name || ext.creator_email || "Unknown";
+    const assignedByLabel = ext.assigned_by_label || "Published by";
+    const audience = ext.target || "ALL";
+    const eventType = ext.type || "general";
+    const eventTypeLabel = ext.type_label || eventType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    const priority = ext.important ? "Important" : "Normal";
+    const dateStr = (info.event.startStr || "").slice(0, 10) || "-";
+    const box = document.getElementById("studentEventDetails");
+    if (!box) return;
+    box.classList.remove("is-hidden");
+    box.innerHTML = `
+        <h4>Event Insights</h4>
+        <div class="calendar-event-grid">
+            <div class="calendar-event-item"><div class="k">Title</div><div class="v">${info.event.title || "-"}</div></div>
+            <div class="calendar-event-item"><div class="k">Subject</div><div class="v">${subject}</div></div>
+            <div class="calendar-event-item"><div class="k">${assignedByLabel}</div><div class="v">${createdBy}</div></div>
+            <div class="calendar-event-item"><div class="k">Date</div><div class="v">${dateStr}</div></div>
+            <div class="calendar-event-item"><div class="k">Audience</div><div class="v">${audience}</div></div>
+            <div class="calendar-event-item"><div class="k">Type</div><div class="v">${eventTypeLabel}</div></div>
+            <div class="calendar-event-item"><div class="k">Priority</div><div class="v">${priority}</div></div>
+        </div>
+    `;
+}
+
+function showSection(id, el = null) {
+
+    document.querySelectorAll(".section").forEach(sec => {
+        sec.classList.remove("active");
+    });
+
+    document.getElementById(id).classList.add("active");
+
+    document.querySelectorAll(".nav-link").forEach(link => link.classList.remove("active"));
+    if (el) {
+        el.classList.add("active");
+    } else {
+        const matched = document.querySelector(`.nav-link[data-section="${id}"]`);
+        if (matched) matched.classList.add("active");
+    }
+
+    if (id === "calendar") {
+
+        if (!calendarInitialized) {
+
+            const calendarEl = document.getElementById('calendarUI');
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: "auto",
+                dayMaxEventRows: 3,
+                headerToolbar: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek"
+                },
+                buttonText: {
+                    today: "Today",
+                    month: "Month",
+                    week: "Week"
+                },
+                events: '/events',
+                eventClassNames: function(info) {
+                    const classes = [];
+                    if (info.event.extendedProps && info.event.extendedProps.important) {
+                        classes.push("is-important");
+                    }
+                    if (
+                        info.event.extendedProps
+                        && info.event.extendedProps.type === "government_holiday"
+                    ) {
+                        classes.push("is-government-holiday");
+                    }
+                    return classes;
+                },
+                eventDidMount: function(info) {
+                    applyReadableEventStyle(info.el);
+                },
+                dateClick: function(info) {
+                    setStudentCalendarMessage("");
+                    const box = document.getElementById("studentEventDetails");
+                    if (box) box.classList.add("is-hidden");
+                    openStudentEventModal("add", { date: info.dateStr, type: "general", important: false });
+                },
+                eventClick: function(info) {
+                    const ext = info.event.extendedProps || {};
+                    renderStudentEventInsights(info);
+                    if (ext.is_owner) {
+                        setStudentCalendarMessage("");
+                        openStudentEventModal("edit", {
+                            id: info.event.id,
+                            title: info.event.title || "",
+                            subject: ext.subject || "",
+                            date: (info.event.startStr || "").slice(0, 10),
+                            type: ext.type || "general",
+                            important: !!ext.important,
+                            customColor: ext.custom_color || ""
+                        });
+                        return;
+                    }
+                }
+            });
+
+            calendar.render();
+            calendarInitialized = true;
+
+        } else {
+            setTimeout(() => {
+                calendar.updateSize();
+            }, 150);
+        }
+    }
+}
+
+function openProfileSection(e) {
+    if (e) e.preventDefault();
+    const profileNav = document.getElementById("profileNavLink");
+    showSection("profile", profileNav);
+}
+
+lucide.createIcons();
+updateLiveStudentHeader();
+setInterval(updateLiveStudentHeader, 60000);
+renderSummary("myTimetableSummary", myTimetableRows, "my");
+initDeptFilter();
+
+</script>
+
+</body>
+</html>
+

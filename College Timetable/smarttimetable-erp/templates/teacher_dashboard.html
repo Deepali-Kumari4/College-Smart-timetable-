@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- FullCalendar -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+    <style>
+        :root {
+            --bg-1: #f5f7fb;
+            --bg-2: #e9edf7;
+            --ink: #14213d;
+            --muted: #5b6787;
+            --side-1: #0b132b;
+            --side-2: #1c2541;
+            --line: #dfe5f1;
+            --card: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            background:
+                radial-gradient(circle at 18% 22%, #ffffff 0%, rgba(255,255,255,0) 35%),
+                radial-gradient(circle at 82% 2%, #edf2ff 0%, rgba(237,242,255,0) 28%),
+                linear-gradient(120deg, var(--bg-1), var(--bg-2));
+            color: var(--ink);
+        }
+
+        /* ===== LAYOUT ===== */
+        .layout {
+            display: flex;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 78px;
+            background: linear-gradient(175deg, var(--side-1), var(--side-2));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            transition: width 0.3s ease;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(3, 7, 18, 0.2);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .sidebar.expanded {
+            width: 260px;
+        }
+
+        .sidebar-header {
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .sidebar-profile {
+            margin: 12px 10px 8px 10px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 6px 14px rgba(31, 90, 204, 0.3);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .sidebar-profile-meta {
+            min-width: 0;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .sidebar-profile-meta {
+            opacity: 1;
+        }
+
+        .sidebar-profile-meta .name {
+            color: #eef2ff;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-profile-meta .role {
+            color: #b9c6ef;
+            font-size: 11px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #d8e1ff;
+            gap: 10px;
+            padding: 13px 14px;
+            margin: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar a:hover {
+            background: rgba(89, 134, 255, 0.2);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .sidebar a.active {
+            background: linear-gradient(90deg, rgba(45,108,223,0.85), rgba(84,122,255,0.95));
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(45,108,223,0.25);
+        }
+
+        .sidebar a.logout-link {
+            color: #d8e7ff;
+            background: linear-gradient(90deg, rgba(45, 108, 223, 0.14), rgba(72, 99, 171, 0.16));
+            border-color: rgba(130, 167, 240, 0.26);
+            box-shadow: none;
+        }
+
+        .sidebar a.logout-link:hover {
+            background: linear-gradient(90deg, rgba(45, 108, 223, 0.28), rgba(84, 122, 255, 0.24));
+            color: #ffffff;
+            border-color: rgba(186, 213, 255, 0.34);
+            box-shadow: 0 8px 18px rgba(45, 108, 223, 0.24);
+            transform: translateY(-1px);
+        }
+
+        .sidebar a.logout-link:active,
+        .sidebar a.logout-link.active {
+            background: linear-gradient(90deg, rgba(35, 78, 167, 0.35), rgba(57, 89, 191, 0.33));
+            color: #ffffff;
+            border-color: rgba(186, 213, 255, 0.30);
+            box-shadow: 0 6px 14px rgba(36, 79, 167, 0.22);
+            transform: translateY(0);
+        }
+
+        .sidebar svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar span {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar.expanded span {
+            opacity: 1;
+        }
+
+        /* ===== MAIN ===== */
+        .main {
+            margin-left: 78px;
+            padding: 26px 28px 40px 28px;
+            flex: 1;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main.shifted {
+            margin-left: 260px;
+        }
+
+        .top-bar {
+            position: relative;
+            top: auto;
+            z-index: 20;
+            margin-bottom: 24px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(8px);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .top-brand h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0.2px;
+        }
+
+        .top-brand p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .top-brand .live-date {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eaf7ff;
+            color: #0f5e84;
+            border: 1px solid #c8e7f6;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef4ff;
+            color: #1747a6;
+            border: 1px solid #cfe0ff;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px 6px 6px;
+            border: 1px solid #d4deee;
+            border-radius: 999px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .profile-chip .avatar {
+            width: 30px;
+            height: 30px;
+            font-size: 11px;
+        }
+
+        .profile-chip .meta {
+            line-height: 1.1;
+        }
+
+        .profile-chip .meta .name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .profile-chip .meta .role {
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .profile-panel {
+            display: none;
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            width: 290px;
+            z-index: 220;
+            background: #fff;
+            border: 1px solid #dfe5f1;
+            border-radius: 12px;
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.16);
+            padding: 14px;
+        }
+
+        .profile-panel.show {
+            display: block;
+        }
+
+        .profile-panel h4 {
+            margin: 0 0 10px 0;
+        }
+
+        .profile-row {
+            font-size: 13px;
+            color: #334155;
+            margin: 6px 0;
+        }
+
+        .profile-panel label {
+            display: block;
+            font-size: 12px;
+            color: #475569;
+            margin-top: 8px;
+        }
+
+        .profile-panel input,
+        .profile-panel select {
+            width: 100%;
+            margin-top: 4px;
+            padding: 8px 9px;
+            border-radius: 8px;
+            border: 1px solid #d2daeb;
+        }
+
+        .profile-panel button {
+            margin-top: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background: #2d6cdf;
+            color: #fff;
+            padding: 9px 10px;
+            cursor: pointer;
+        }
+
+        .profile-erp {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .profile-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 20px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(255,255,255,0.65), rgba(255,255,255,0)),
+                linear-gradient(90deg, #edf3ff, #e2ecff);
+            border-bottom: 1px solid #d7e3fb;
+        }
+
+        .profile-hero h3 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .profile-hero p {
+            margin: 4px 0 0 0;
+            color: #4b5f8f;
+            font-size: 13px;
+        }
+
+        .profile-main {
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            gap: 18px;
+            padding: 18px;
+        }
+
+        .profile-side {
+            border: 1px solid #e0e8f6;
+            border-radius: 12px;
+            background: #f8fbff;
+            padding: 14px;
+        }
+
+        .profile-avatar-lg {
+            width: 94px;
+            height: 94px;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 34px;
+            box-shadow: 0 12px 24px rgba(45, 108, 223, 0.25);
+            overflow: hidden;
+        }
+
+        .profile-avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-side .meta-line {
+            font-size: 13px;
+            color: #334155;
+            margin: 7px 0;
+        }
+
+        .profile-form {
+            border: 1px solid #e0e8f6;
+            border-radius: 12px;
+            background: #fff;
+            padding: 14px;
+        }
+
+        .profile-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .profile-form-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .profile-form label {
+            display: block;
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+
+        .profile-form input,
+        .profile-form select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #d0dbef;
+            font-family: 'Space Grotesk', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .profile-form input:focus,
+        .profile-form select:focus {
+            outline: none;
+            border-color: #2d6cdf;
+            box-shadow: 0 0 0 3px rgba(45,108,223,0.15);
+        }
+
+        .profile-form .submit-btn {
+            margin-top: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 11px;
+            background: linear-gradient(90deg, #2d6cdf, #4d83f6);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 860px) {
+            .profile-main {
+                grid-template-columns: 1fr;
+            }
+            .profile-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== SECTION CONTROL ===== */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+            margin-bottom: 30px;
+        }
+
+        /* ===== TABLE ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f7fc;
+            padding: 12px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .hero-elevated {
+            position: relative;
+            top: auto;
+            z-index: 70;
+            margin: 0 0 24px 0;
+        }
+
+        .hero-elevated .top-bar {
+            margin: 0;
+        }
+
+        .hero-elevated .top-brand h1 {
+            font-size: 22px;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-elevated .top-brand p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .courses-card {
+            border: 1px solid #dbe6f8;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #ffffff, #f9fbff);
+        }
+
+        .courses-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .courses-head h3 {
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: -0.3px;
+        }
+
+        .courses-sub {
+            margin: 6px 0 0 0;
+            color: #526489;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .courses-count {
+            white-space: nowrap;
+            border-radius: 999px;
+            border: 1px solid #cfe0ff;
+            background: #eef4ff;
+            color: #1f4297;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 7px 11px;
+        }
+
+        .pro-table-wrap {
+            border: 1px solid #e0e8f8;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .pro-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .pro-table thead th {
+            background: linear-gradient(180deg, #f4f7ff, #edf3ff);
+            color: #1a2f58;
+            border-bottom: 1px solid #d7e3fb;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .pro-table tbody td {
+            padding: 14px 14px;
+            border-bottom: 1px solid #e6edf9;
+            color: #172a4d;
+            vertical-align: top;
+        }
+
+        .pro-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .subject-strong {
+            font-weight: 700;
+            color: #0f2248;
+            letter-spacing: 0.01em;
+        }
+
+        .target-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1f4297;
+            background: #e9f0ff;
+            border: 1px solid #cfe0ff;
+        }
+
+        .pref-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pref-chip {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #d9e5fb;
+            background: #f8fbff;
+            color: #284371;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 4px 9px;
+        }
+
+        .pref-empty {
+            color: #7b8daa;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .tt-day-card {
+            border: 1px solid #dfe7f6;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: linear-gradient(180deg, #ffffff, #f9fbff);
+            box-shadow: 0 8px 20px rgba(18, 33, 77, 0.04);
+        }
+
+        .tt-day-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tt-day-head h4 {
+            margin: 0;
+            color: #182540;
+            font-size: 16px;
+        }
+
+        .tt-count {
+            font-size: 11px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: #e9f0ff;
+            color: #1e429f;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tt-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .tt-item {
+            border: 1px solid #e3e9f5;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            display: grid;
+            grid-template-columns: 58px 1fr;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tt-slot {
+            border-radius: 8px;
+            padding: 6px 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f2f74;
+            background: #e8f0ff;
+        }
+
+        .tt-subject {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+
+        .tt-meta {
+            font-size: 12px;
+            color: #4a5a7a;
+        }
+
+        .tt-label {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* ===== FORM ===== */
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        /* ===== CARD HEADER ===== */
+        .card-header h3 {
+            margin: 0;
+            font-size: 29px;
+            letter-spacing: -0.2px;
+            color: #122a52;
+        }
+
+        .card-subtitle {
+            margin-top: 7px;
+            font-size: 14px;
+            color: #54688f;
+            max-width: 620px;
+            line-height: 1.55;
+        }
+
+        /* ===== FORM STRUCTURE ===== */
+        .form-layout {
+            margin-top: 22px;
+            padding: 20px;
+            border: 1px solid #d7e4fb;
+            border-radius: 16px;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(105, 148, 255, 0.14), rgba(105, 148, 255, 0)),
+                linear-gradient(180deg, #ffffff, #f8fbff);
+            box-shadow: 0 12px 26px rgba(20, 36, 79, 0.06);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            align-items: start;
+        }
+
+        .form-layout > .form-grid:first-of-type {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            column-gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+            margin-bottom: 0;
+            color: #3e5888;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            min-height: 48px;
+            padding: 11px 12px;
+            margin-bottom: 0;
+            border-radius: 11px;
+            border: 1px solid #c9d8ef;
+            font-size: 14px;
+            color: #12284f;
+            background: #fff;
+            line-height: 1.25;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: #fcfdff;
+        }
+
+        .form-group select {
+            padding-right: 34px;
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(37,99,235,0), rgba(37,99,235,0.25), rgba(37,99,235,0));
+            margin: 26px 0 24px 0;
+        }
+
+        /* ===== PREFERENCE GRID ===== */
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        /* ===== INDIVIDUAL CLASS CARD ===== */
+        .preference-card {
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #dbe6f8;
+            box-shadow: 0 8px 18px rgba(25, 43, 84, 0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .preference-card:hover {
+            border-color: #9ab8f5;
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .preference-header {
+            margin-bottom: 14px;
+        }
+
+        .preference-header h4 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -0.2px;
+            color: #122a52;
+        }
+
+        .preference-header span {
+            font-size: 12px;
+            color: #5f749a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .preference-card .form-group label {
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            color: #4a6491;
+        }
+
+        /* ===== ACTION BUTTON ===== */
+        .form-actions {
+            margin-top: 24px;
+            padding-top: auto;
+            border-top: 1px solid #dfebff;
+            text-align: right;
+        }
+
+        .primary-btn {
+            background: linear-gradient(90deg, #2563eb, #4a82f5);
+            color: white;
+            padding: 11px 24px;
+            border-radius: 10px;
+            border: 1px solid #3b73e8;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.24);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            filter: brightness(1.04);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
+        }
+
+        @media (max-width: 1100px) {
+            .form-layout > .form-grid:first-of-type {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preference-studio {
+            border: 1px solid #d7e5fb;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(118, 167, 255, 0.18), rgba(118, 167, 255, 0)),
+                linear-gradient(180deg, #ffffff, #f8fbff);
+            box-shadow: 0 14px 30px rgba(17, 24, 39, 0.07);
+        }
+
+        .pref-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .pref-hero h3 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -0.2px;
+            color: #112b56;
+        }
+
+        .pref-hero p {
+            margin: 6px 0 0 0;
+            font-size: 12px;
+            color: #536991;
+            line-height: 1.45;
+            max-width: 640px;
+        }
+
+        .pref-meta-chip {
+            white-space: nowrap;
+            border-radius: 999px;
+            border: 1px solid #cfe0ff;
+            background: #eef4ff;
+            color: #1d449d;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+        }
+
+        .pref-form-shell {
+            border: 1px solid #d9e6fb;
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+        }
+
+        .pref-core-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+
+        .pref-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .pref-field label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+            color: #3f5988;
+        }
+
+        .pref-field input,
+        .pref-field select {
+            width: 100%;
+            min-height: 42px;
+            padding: 8px 11px;
+            border-radius: 11px;
+            border: 1px solid #c9d8ef;
+            font-size: 14px;
+            color: #12284f;
+            background: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .pref-field input:focus,
+        .pref-field select:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: #fcfdff;
+        }
+
+        .pref-field select {
+            padding-right: 34px;
+        }
+
+        .pref-sep {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(37,99,235,0), rgba(37,99,235,0.26), rgba(37,99,235,0));
+            margin: 14px 0;
+        }
+
+        .pref-slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .pref-slot-card {
+            border: 1px solid #d9e6fa;
+            border-radius: 14px;
+            padding: 12px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            box-shadow: 0 8px 18px rgba(25, 43, 84, 0.05);
+        }
+
+        .pref-slot-head {
+            margin-bottom: 8px;
+        }
+
+        .pref-slot-head h4 {
+            margin: 0;
+            font-size: 16px;
+            letter-spacing: -0.2px;
+            color: #122a52;
+        }
+
+        .pref-slot-head span {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #5e75a0;
+            font-weight: 700;
+        }
+
+        .pref-slot-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .pref-slot-card .pref-field label {
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            color: #496493;
+        }
+
+        .pref-submit-row {
+            margin-top: 22px;
+            padding-top: auto;
+            border-top: 1px solid #deebff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .pref-submit-note {
+            font-size: 12px;
+            color: #5a6f98;
+        }
+
+        @media (max-width: 1100px) {
+            .pref-core-grid,
+            .pref-slot-grid {
+                grid-template-columns: 1fr;
+            }
+            .pref-slot-fields {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .pref-hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .pref-hero h3 {
+                font-size: 20px;
+            }
+            .pref-submit-row {
+                justify-content: flex-end;
+            }
+        }
+
+        .calendar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 14px;
+            padding: 14px 16px;
+            border: 1px solid #d7e3f5;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            box-shadow: 0 8px 20px rgba(22, 45, 90, 0.05);
+        }
+
+        .calendar-toolbar h4 {
+            margin: 0;
+            font-size: 17px;
+            color: #172a4e;
+        }
+
+        .calendar-toolbar p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #516285;
+            max-width: 520px;
+        }
+
+        .calendar-toolbar-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-action-msg {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e429f;
+            min-height: 18px;
+            min-width: 180px;
+            text-align: right;
+        }
+
+        .calendar-add-btn {
+            border: 1px solid #bedef1;
+            background: linear-gradient(90deg, #16a8df, #1497d2);
+            color: #fff;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .calendar-add-btn:hover {
+            filter: brightness(1.04);
+        }
+
+        .calendar-main-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.8fr) minmax(270px, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .calendar-surface {
+            border: 1px solid #d6e0ef;
+            border-radius: 16px;
+            background: #fff;
+            padding: 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            min-width: 0;
+        }
+
+        #calendarUI .fc {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #calendarUI .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #calendarUI .fc-toolbar-title {
+            font-size: clamp(20px, 3vw, 30px);
+            color: #15223a;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            line-height: 1.15;
+            text-align: center;
+        }
+
+        #calendarUI .fc-toolbar-chunk {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #calendarUI .fc-toolbar-chunk:nth-child(2) {
+            justify-content: center;
+            min-width: 0;
+        }
+
+        #calendarUI .fc-toolbar-chunk:last-child {
+            justify-content: flex-end;
+        }
+
+        #calendarUI .fc-button {
+            border: 1px solid #bedef1 !important;
+            background: linear-gradient(90deg, #16a8df, #1497d2) !important;
+            color: #fff !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+            padding: 7px 12px !important;
+            box-shadow: none !important;
+            text-transform: capitalize !important;
+        }
+
+        #calendarUI .fc-button-group {
+            display: inline-flex !important;
+            gap: 8px;
+        }
+
+        #calendarUI .fc-button-group > .fc-button {
+            margin: 0 !important;
+            margin-left: 8px !important;
+            border-radius: 10px !important;
+        }
+
+        #calendarUI .fc-button-group > .fc-button:first-child {
+            margin-left: 0 !important;
+        }
+
+        #calendarUI .fc-button:hover {
+            filter: brightness(1.04);
+        }
+
+        @media (max-width: 980px) {
+            #calendarUI .fc-toolbar.fc-header-toolbar {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            #calendarUI .fc-toolbar-chunk {
+                justify-content: center !important;
+                flex-wrap: wrap;
+            }
+        }
+
+        #calendarUI .fc-button-primary:not(:disabled).fc-button-active,
+        #calendarUI .fc-button-primary:not(:disabled):active {
+            background: linear-gradient(90deg, #1497d2, #117fb2) !important;
+            border-color: #117fb2 !important;
+            color: #fff !important;
+        }
+
+        #calendarUI .fc-col-header {
+            border: none !important;
+        }
+
+        #calendarUI .fc-col-header-cell {
+            border: none !important;
+            background: linear-gradient(90deg, #16ace0, #1496d1);
+        }
+
+        #calendarUI .fc-col-header-cell:first-child {
+            border-radius: 999px 0 0 999px;
+        }
+
+        #calendarUI .fc-col-header-cell:last-child {
+            border-radius: 0 999px 999px 0;
+        }
+
+        #calendarUI .fc-col-header-cell-cushion {
+            color: #f8fdff;
+            font-weight: 700;
+            padding: 9px 0;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+        }
+
+        #calendarUI .fc-daygrid-day {
+            transition: background 0.2s ease;
+        }
+
+        #calendarUI .fc-daygrid-day:hover {
+            background: #f8fbff;
+        }
+
+        #calendarUI .fc-daygrid-day-frame {
+            padding: 3px;
+            min-height: 76px;
+        }
+
+        #calendarUI .fc-daygrid-day-number {
+            color: #2b2f37;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 6px 8px;
+        }
+
+        #calendarUI .fc .fc-daygrid-day.fc-day-today {
+            background: #e8f6ff !important;
+        }
+
+        #calendarUI .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+            background: #d7effb;
+            border-radius: 8px;
+            color: #0f5e84;
+        }
+
+        #calendarUI .fc-event {
+            border: none !important;
+            border-left: 3px solid #0877ab !important;
+            border-radius: 6px !important;
+            padding: 2px 6px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            background: #e8f7ff !important;
+            color: #0d5f87 !important;
+            box-shadow: none;
+        }
+
+        #calendarUI .fc-event-title,
+        #calendarUI .fc-event-main-frame {
+            text-shadow: none !important;
+            filter: none !important;
+        }
+
+        #calendarUI .fc-event.is-important {
+            border-left-color: #d97706 !important;
+            background: #fff1dd !important;
+            color: #9a3412 !important;
+        }
+
+        #calendarUI .fc-event.is-government-holiday {
+            border-left-color: #0f766e !important;
+            background: #dcfdf7 !important;
+            color: #0f766e !important;
+            border: none !important;
+        }
+
+        #calendarUI .fc-event.is-important.is-government-holiday {
+            border-left-color: #0f766e !important;
+            background: #dcfdf7 !important;
+            color: #0f766e !important;
+        }
+
+        #calendarUI .fc-theme-standard td,
+        #calendarUI .fc-theme-standard th {
+            border-color: #e3e9f3 !important;
+        }
+
+        .vacation-panel {
+            margin-top: 14px;
+            border: 1px dashed #9ecadd;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #f9fdff, #f3fbff);
+            padding: 14px 16px;
+        }
+
+        .vacation-panel h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #0f5e84;
+            letter-spacing: 0.01em;
+        }
+
+        .vacation-list {
+            display: grid;
+            gap: 8px;
+            max-height: 360px;
+            overflow: auto;
+            padding-right: 2px;
+        }
+
+        .vacation-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid #d5e8f3;
+        }
+
+        .vacation-date {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 106px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: #e8f7ff;
+            color: #0d5f87;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .vacation-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1d334d;
+        }
+
+        .vacation-empty {
+            font-size: 13px;
+            color: #64748b;
+            padding: 10px 12px;
+            border: 1px dashed #cfdaef;
+            border-radius: 10px;
+            background: #f8fbff;
+        }
+
+        .teacher-event-insights {
+            margin-top: 12px;
+            border: 1px solid #dce6f7;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            padding: 12px;
+        }
+
+        .teacher-event-insights.is-hidden {
+            display: none;
+        }
+
+        .teacher-event-insights h4 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #1a2c50;
+        }
+
+        .teacher-event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+        }
+
+        .teacher-event-item {
+            border: 1px solid #e1e8f6;
+            border-radius: 10px;
+            background: #fff;
+            padding: 8px 10px;
+        }
+
+        .teacher-event-item .k {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .teacher-event-item .v {
+            margin-top: 2px;
+            font-size: 13px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .event-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 15, 35, 0.52);
+            backdrop-filter: blur(2px);
+            z-index: 240;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .event-modal-overlay.show {
+            display: flex;
+        }
+
+        .event-modal {
+            width: 100%;
+            max-width: 520px;
+            background: #fff;
+            border: 1px solid #dbe5f6;
+            border-radius: 14px;
+            box-shadow: 0 24px 40px rgba(15, 23, 42, 0.2);
+            overflow: hidden;
+        }
+
+        .event-modal-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e5ecf8;
+            background: linear-gradient(90deg, #edf3ff, #e1ebff);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-modal-head h4 {
+            margin: 0;
+            font-size: 17px;
+            color: #18294d;
+        }
+
+        .event-modal-close {
+            border: none;
+            background: #ffffff;
+            color: #334155;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .event-modal-body {
+            padding: 14px 16px 16px 16px;
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .event-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .event-grid label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .event-grid input,
+        .event-grid select {
+            width: 100%;
+            margin: 0;
+            padding: 10px;
+            border-radius: 9px;
+            border: 1px solid #cfdaef;
+            font-family: 'Space Grotesk', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .event-grid input:focus,
+        .event-grid select:focus {
+            outline: none;
+            border-color: #2d6cdf;
+            box-shadow: 0 0 0 3px rgba(45,108,223,0.14);
+        }
+
+        .event-color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 8px;
+            border: 1px solid #d8e2f2;
+            border-radius: 10px;
+            background: #f8fbff;
+        }
+
+        .event-color-chip {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.15);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .event-color-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 2px rgba(45, 108, 223, 0.28);
+        }
+
+        .event-color-chip.active {
+            box-shadow: 0 0 0 2px rgba(45, 108, 223, 0.65), 0 4px 12px rgba(45, 108, 223, 0.25);
+        }
+
+        .event-color-auto {
+            border: 1px solid #ccd7eb;
+            background: #fff;
+            color: #334155;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .event-color-auto.active {
+            border-color: #2d6cdf;
+            color: #1e429f;
+            background: #ecf3ff;
+        }
+
+        .event-actions {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .event-actions-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .danger-btn {
+            border: none;
+            border-radius: 9px;
+            background: #b42318;
+            color: #fff;
+            padding: 9px 12px;
+            cursor: pointer;
+        }
+
+        .light-btn {
+            border: 1px solid #d4deee;
+            border-radius: 9px;
+            background: #fff;
+            color: #334155;
+            padding: 9px 12px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 860px) {
+            .event-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .calendar-toolbar-right {
+                align-items: flex-start;
+            }
+
+            .calendar-action-msg {
+                text-align: left;
+                min-width: 0;
+            }
+
+            .calendar-main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+
+            <div class="sidebar-header" onclick="toggleSidebar()">
+                <i data-lucide="menu"></i>
+            </div>
+
+            <div class="sidebar-profile" onclick="openProfileSection(event)">
+                <div class="avatar">
+                    {% if teacher_profile_pic %}
+                    <img src="{{ url_for('static', filename=teacher_profile_pic) }}" alt="Profile">
+                    {% else %}
+                    {{ teacher[:1] | upper }}
+                    {% endif %}
+                </div>
+                <div class="sidebar-profile-meta">
+                    <div class="name">{{ teacher }}</div>
+                    <div class="role">{{ teacher_department }} Faculty</div>
+                </div>
+            </div>
+
+            <a href="#" class="nav-link active" data-section="dashboard" onclick="showSection('dashboard', this)">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-link" data-section="courses" onclick="showSection('courses', this)">
+                <i data-lucide="book-open"></i>
+                <span>My Courses</span>
+            </a>
+
+            <a href="#" class="nav-link" data-section="preferences" onclick="showSection('preferences', this)">
+                <i data-lucide="edit-3"></i>
+                <span>Add / Update Preferences</span>
+            </a>
+
+            <a href="#" class="nav-link" data-section="my-timetable" onclick="showSection('my-timetable', this)">
+                <i data-lucide="calendar-check"></i>
+                <span>My Timetable</span>
+            </a>
+
+            <a href="#" class="nav-link" data-section="institute-timetable" onclick="showSection('institute-timetable', this)">
+                <i data-lucide="building-2"></i>
+                <span>Institute Timetable</span>
+            </a>
+
+            <a href="#" class="nav-link" data-section="calendar" onclick="showSection('calendar', this)">
+                <i data-lucide="calendar-days"></i>
+                <span>Academic Calendar</span>
+            </a>
+
+            <a href="/logout" class="logout-link">
+                <i data-lucide="log-out"></i>
+                <span>Logout</span>
+            </a>
+
+        </div>
+
+        <!-- MAIN -->
+        <div class="main" id="main">
+
+            <div class="hero-elevated">
+            <div class="top-bar">
+                <div class="top-brand">
+                    <h1 id="liveTeacherWelcome">Welcome, {{ teacher }}</h1>
+                    <p id="liveTeacherLine">
+                        SmartTimetable Faculty Workspace
+                        <span id="liveTeacherDate" class="live-date"></span>
+                    </p>
+                </div>
+                <div class="top-right">
+                    <div class="top-pill" id="liveTeacherPortal">
+                        <i data-lucide="briefcase"></i>
+                        {{ teacher_department }} | Faculty Portal
+                    </div>
+                    <div class="profile-chip" onclick="openProfileSection(event)">
+                        <div class="avatar">
+                            {% if teacher_profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher_profile_pic) }}" alt="Profile">
+                            {% else %}
+                            {{ teacher[:1] | upper }}
+                            {% endif %}
+                        </div>
+                        <div class="meta">
+                            <div class="name">{{ teacher }}</div>
+                            <div class="role">Teacher</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="profile" class="section">
+                <div class="card profile-erp">
+                    <div class="profile-hero">
+                        <div>
+                            <h3>My Profile</h3>
+                            <p>Manage your faculty identity and account settings</p>
+                        </div>
+                        <div class="top-pill">
+                            <i data-lucide="sparkles"></i>
+                            Faculty ERP Profile
+                        </div>
+                    </div>
+
+                    <div class="profile-main">
+                        <div class="profile-side">
+                            <div class="profile-avatar-lg">
+                                {% if teacher_profile_pic %}
+                                <img src="{{ url_for('static', filename=teacher_profile_pic) }}" alt="Profile">
+                                {% else %}
+                                {{ teacher[:1] | upper }}
+                                {% endif %}
+                            </div>
+                            <div class="meta-line"><b>Name:</b> {{ teacher }}</div>
+                            <div class="meta-line"><b>Email:</b> {{ teacher_email }}</div>
+                            <div class="meta-line"><b>Role:</b> Teacher</div>
+                            <div class="meta-line"><b>Department:</b> {{ teacher_department }}</div>
+                        </div>
+
+                        <form class="profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
+                            <div class="profile-form-grid">
+                                <div class="full">
+                                    <label>Name</label>
+                                    <input type="text" name="name" value="{{ teacher }}" required>
+                                </div>
+
+                                <div>
+                                    <label>Department</label>
+                                    <select name="department">
+                                        <option {% if teacher_department == 'ALL' %}selected{% endif %}>ALL</option>
+                                        <option {% if teacher_department == 'CSE' %}selected{% endif %}>CSE</option>
+                                        <option {% if teacher_department == 'ECE' %}selected{% endif %}>ECE</option>
+                                        <option {% if teacher_department == 'IT' %}selected{% endif %}>IT</option>
+                                        <option {% if teacher_department == 'ME' %}selected{% endif %}>ME</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label>Profile Picture</label>
+                                    <input type="file" name="profile_pic" accept="image/*">
+                                </div>
+                            </div>
+                            <button class="submit-btn" type="submit">Update Profile</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="section active">
+                <div class="card">
+                    <h3>Teacher Overview</h3>
+                    <p>
+                        Manage your courses, submit preferences and schedule academic events
+                        using the navigation menu.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Today's Teaching Plan ({{ today_name }})</h3>
+                    <p style="color:#64748b; margin-top:0;">
+                        Total classes today: <b>{{ today_classes | length }}</b>
+                    </p>
+                    {% if today_classes %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Slot</th>
+                                <th>Subject</th>
+                                <th>Department</th>
+                                <th>Room</th>
+                                <th>Label</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in today_classes %}
+                            <tr>
+                                <td>{{ row.slot }}</td>
+                                <td>{{ row.subject }}</td>
+                                <td>{{ row.target }}</td>
+                                <td>{{ row.room }}</td>
+                                <td>{{ row.label if row.label else "-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p style="color:#64748b;">No classes assigned today.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- COURSES -->
+            <div id="courses" class="section">
+                <div class="card courses-card">
+                    <div class="courses-head">
+                        <div>
+                            <h3>Your Submitted Courses</h3>
+                            <p class="courses-sub">A consolidated view of approved subjects, student load and preferred slot pattern.</p>
+                        </div>
+                        <span class="courses-count">{{ rows | length }} total</span>
+                    </div>
+
+                    {% if rows %}
+                    <div class="pro-table-wrap">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Students</th>
+                                <th>Target</th>
+                                <th>Preferences</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td><span class="subject-strong">{{ row.subject }}</span></td>
+                                <td>{{ row.students }}</td>
+                                <td><span class="target-chip">{{ row.target }}</span></td>
+                                <td>
+                                    <div class="pref-group">
+                                        {% set ns = namespace(has_pref=false) %}
+                                        {% for p in row.prefs %}
+                                            {% if p != "-:-" %}
+                                                {% set ns.has_pref = true %}
+                                                <span class="pref-chip">{{ p }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not ns.has_pref %}
+                                            <span class="pref-empty">No preferred slot selected</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                    {% else %}
+                    <p style="color:#64748b;">No courses submitted yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- PREFERENCES -->
+            <div id="preferences" class="section">
+                <div class="card preference-studio">
+
+                    <div class="pref-hero">
+                        <div>
+                            <h3>Add / Update Preferences</h3>
+                            <p>Define subject details and preferred weekly slots in one structured submission for admin approval.</p>
+                        </div>
+                        <span class="pref-meta-chip">3 Class Preferences</span>
+                    </div>
+
+                    <form action="/submit_teacher" method="post" class="pref-form-shell">
+                        <input type="hidden" name="teacher" value="{{ teacher }}">
+
+                        <div class="pref-core-grid">
+                            <div class="pref-field">
+                                <label>Subject</label>
+                                <input type="text" name="subject" placeholder="e.g. Computer Architecture" required>
+                            </div>
+                            <div class="pref-field">
+                                <label>Number of Students</label>
+                                <input type="number" name="students" placeholder="e.g. 60" required>
+                            </div>
+                            <div class="pref-field">
+                                <label>Target Department</label>
+                                <select name="target">
+                                    <option>ALL</option>
+                                    <option>CSE</option>
+                                    <option>ECE</option>
+                                    <option>IT</option>
+                                    <option>ME</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pref-sep"></div>
+
+                        <div class="pref-slot-grid">
+                            {% for i in [1,2,3] %}
+                            <div class="pref-slot-card">
+                                <div class="pref-slot-head">
+                                    <h4>Class {{ i }}</h4>
+                                    <span>Weekly Preference</span>
+                                </div>
+                                <div class="pref-slot-fields">
+                                    <div class="pref-field">
+                                        <label>Day</label>
+                                        <select name="day{{ i }}">
+                                            <option>-</option>
+                                            <option>Mon</option>
+                                            <option>Tue</option>
+                                            <option>Wed</option>
+                                            <option>Thu</option>
+                                            <option>Fri</option>
+                                        </select>
+                                    </div>
+                                    <div class="pref-field">
+                                        <label>Slot</label>
+                                        <select name="slot{{ i }}">
+                                            <option>-</option>
+                                            <option>S1</option>
+                                            <option>S2</option>
+                                            <option>S3</option>
+                                            <option>S4</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="pref-submit-row">
+                            <div class="pref-submit-note">Your request will be reviewed by admin before it becomes active in timetable generation.</div>
+                            <button type="submit" class="primary-btn">Submit For Admin Approval</button>
+                        </div>
+                    </form>
+
+                    {% if pending_rows %}
+                    <div class="divider"></div>
+                    <h3>Pending Preference Requests</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Students</th>
+                                <th>Target</th>
+                                <th>Preferences</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in pending_rows %}
+                            <tr>
+                                <td>{{ row.subject }}</td>
+                                <td>{{ row.students }}</td>
+                                <td>{{ row.target }}</td>
+                                <td>{{ row.prefs | join(", ") }}</td>
+                                <td>Pending Admin Review</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- MY TIMETABLE -->
+            <div id="my-timetable" class="section">
+                <div class="card">
+                    <h3>My Timetable</h3>
+                    <div id="teacherMyTimetableSummary"></div>
+                </div>
+            </div>
+
+            <!-- INSTITUTE TIMETABLE -->
+            <div id="institute-timetable" class="section">
+                <div class="card">
+                    <h3>Institute Timetable</h3>
+                    <div style="max-width:360px; margin-bottom:14px;">
+                        <label style="font-size:13px; color:#475569;">Filter by Department</label>
+                        <div style="display:flex; gap:8px; margin-top:6px;">
+                            <select id="teacherDeptFilter" style="flex:1; padding:9px 10px; border-radius:8px; border:1px solid #cfd8eb;">
+                                <option value="ALL">All Departments</option>
+                            </select>
+                            <select id="teacherDayFilter" style="flex:1; padding:9px 10px; border-radius:8px; border:1px solid #cfd8eb;">
+                                <option value="ALL">All Days</option>
+                                <option value="Mon">Monday</option>
+                                <option value="Tue">Tuesday</option>
+                                <option value="Wed">Wednesday</option>
+                                <option value="Thu">Thursday</option>
+                                <option value="Fri">Friday</option>
+                            </select>
+                            <button id="teacherDeptReset" type="button" style="border:none; border-radius:8px; background:#dde6f7; color:#1e293b; padding:9px 12px; cursor:pointer;">Reset</button>
+                        </div>
+                        <div id="teacherFilterCount" style="margin-top:8px; font-size:12px; color:#334155;"></div>
+                    </div>
+                    <div id="teacherInstituteTimetableSummary"></div>
+                </div>
+            </div>
+
+            <!-- CALENDAR -->
+            <div id="calendar" class="section">
+                <div class="card">
+                    <h3>Academic Calendar</h3>
+                    <div class="calendar-toolbar">
+                        <div>
+                            <h4>Faculty Event Planner</h4>
+                            <p>Click any date to create an event. Click your event to edit or delete.</p>
+                        </div>
+                        <div class="calendar-toolbar-right">
+                            <div id="calendarActionMsg" class="calendar-action-msg"></div>
+                            <button type="button" class="calendar-add-btn" onclick="openTeacherEventModal('add', { date: '', type: 'general', target: '{{ teacher_department | upper }}', important: false })">Add Event</button>
+                        </div>
+                    </div>
+                    <div class="calendar-main-grid">
+                        <div id="calendarUI" class="calendar-surface"></div>
+                        <div class="vacation-panel">
+                            <h4>Upcoming Celebration Days & Official Holidays</h4>
+                            {% if vacations %}
+                                <div class="vacation-list">
+                                {% for v in vacations %}
+                                <div class="vacation-item">
+                                    <span class="vacation-date">{{ v.date }}</span>
+                                    <span class="vacation-title">{{ v.title }}</span>
+                                </div>
+                                {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="vacation-empty">No upcoming celebration days or official holidays.</div>
+                            {% endif %}
+                            <div id="teacherEventInsights" class="teacher-event-insights is-hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-modal-overlay" id="teacherEventModalOverlay">
+                <div class="event-modal">
+                    <div class="event-modal-head">
+                        <h4 id="teacherEventModalTitle">Add Event</h4>
+                        <button type="button" class="event-modal-close" onclick="closeTeacherEventModal()">x</button>
+                    </div>
+                    <div class="event-modal-body">
+                        <div class="event-grid">
+                            <div class="full">
+                                <label for="teacherEventName">Event Title</label>
+                                <input id="teacherEventName" type="text" placeholder="e.g. Quiz 1, Midterm Revision, Lab Assessment">
+                            </div>
+                            <div class="full">
+                                <label for="teacherEventSubject">Subject</label>
+                                <input id="teacherEventSubject" type="text" placeholder="e.g. Data Structures">
+                            </div>
+                            <div>
+                                <label for="teacherEventDate">Date</label>
+                                <input id="teacherEventDate" type="date">
+                            </div>
+                            <div>
+                                <label for="teacherEventType">Type</label>
+                                <select id="teacherEventType">
+                                    <option value="general">General</option>
+                                    <option value="test">Test</option>
+                                    <option value="exam">Exam</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="teacherEventTarget">Audience</label>
+                                <select id="teacherEventTarget">
+                                    <option value="ALL">All Departments</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="IT">IT</option>
+                                    <option value="ME">ME</option>
+                                </select>
+                            </div>
+                            <div class="full">
+                                <label for="teacherEventImportant">Priority</label>
+                                <select id="teacherEventImportant">
+                                    <option value="no">Normal</option>
+                                    <option value="yes">Important</option>
+                                </select>
+                            </div>
+                            <div class="full">
+                                <label>Event Label Color</label>
+                                <div class="event-color-picker" id="teacherEventColorPicker">
+                                    <button type="button" class="event-color-auto active" id="teacherColorAutoBtn" onclick="selectTeacherEventColor('')">Auto by Type</button>
+                                    <button type="button" class="event-color-chip" data-color="#2563eb" style="background:#2563eb;" onclick="selectTeacherEventColor('#2563eb')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#0f766e" style="background:#0f766e;" onclick="selectTeacherEventColor('#0f766e')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#047857" style="background:#047857;" onclick="selectTeacherEventColor('#047857')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#b45309" style="background:#b45309;" onclick="selectTeacherEventColor('#b45309')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#c2410c" style="background:#c2410c;" onclick="selectTeacherEventColor('#c2410c')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#9f1239" style="background:#9f1239;" onclick="selectTeacherEventColor('#9f1239')"></button>
+                                    <button type="button" class="event-color-chip" data-color="#6d28d9" style="background:#6d28d9;" onclick="selectTeacherEventColor('#6d28d9')"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="event-actions">
+                            <button type="button" class="danger-btn" id="teacherEventDeleteBtn" style="display:none;" onclick="deleteTeacherEvent()">Delete Event</button>
+                            <div class="event-actions-right">
+                                <button type="button" class="light-btn" onclick="closeTeacherEventModal()">Cancel</button>
+                                <button type="button" onclick="saveTeacherEvent()">Save Event</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script id="teacherMyRowsData" type="application/json">{{ my_timetable | tojson }}</script>
+    <script id="teacherInstituteRowsData" type="application/json">{{ institute_timetable | tojson }}</script>
+    <script>
+
+        let calendar = null;
+        let calendarInitialized = false;
+        const teacherMyRows = JSON.parse(document.getElementById("teacherMyRowsData").textContent || "[]");
+        const teacherInstituteRows = JSON.parse(document.getElementById("teacherInstituteRowsData").textContent || "[]");
+        const dayOrder = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 };
+        const slotOrder = { S1: 1, S2: 2, S3: 3, S4: 4 };
+        const fullDayName = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday" };
+        let teacherEventMode = "add";
+        let teacherEditingEventId = "";
+        let teacherEventLabelColor = "";
+        const teacherDisplayName = "{{ teacher }}";
+        const teacherDeptName = "{{ teacher_department }}";
+        const teacherTodayClassesCount = {{ today_classes | length }};
+
+        function getTeacherActiveSectionLabel() {
+            const activeLink = document.querySelector(".nav-link.active span");
+            if (!activeLink) return "Dashboard";
+            return (activeLink.textContent || "Dashboard").trim();
+        }
+
+        function updateLiveTeacherHeader() {
+            const now = new Date();
+            const hr = now.getHours();
+            let part = "Evening";
+            if (hr < 12) part = "Morning";
+            else if (hr < 17) part = "Afternoon";
+            const sectionLabel = getTeacherActiveSectionLabel();
+
+            const title = document.getElementById("liveTeacherWelcome");
+            const line = document.getElementById("liveTeacherLine");
+            const portal = document.getElementById("liveTeacherPortal");
+            if (title) {
+                title.textContent = `Good ${part}, ${teacherDisplayName}`;
+            }
+            if (line) {
+                line.innerHTML = `SmartTimetable Faculty Workspace | ${sectionLabel} | ${teacherTodayClassesCount} classes today <span id="liveTeacherDate" class="live-date"></span>`;
+            }
+            if (portal) {
+                portal.innerHTML = `<i data-lucide="briefcase"></i>${teacherDeptName} | Faculty Portal | ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+            }
+            const dateTag = document.getElementById("liveTeacherDate");
+            if (dateTag) {
+                dateTag.textContent = now.toLocaleDateString([], {
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function applyReadableEventStyle(eventEl) {
+            if (!eventEl) return;
+            const bg = window.getComputedStyle(eventEl).backgroundColor || "";
+            const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+            if (!m) return;
+            const r = parseInt(m[1], 10) / 255;
+            const g = parseInt(m[2], 10) / 255;
+            const b = parseInt(m[3], 10) / 255;
+            const luminance = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+            const textColor = luminance > 0.6 ? "#1f2937" : "#ffffff";
+            eventEl.style.setProperty("--fc-event-text-color", textColor);
+            eventEl.style.color = textColor;
+            eventEl.style.textShadow = "none";
+            eventEl.style.fontWeight = "700";
+            eventEl.querySelectorAll(".fc-event-title, .fc-event-time, .fc-event-main-frame, .fc-event-title-container").forEach((node) => {
+                node.style.color = textColor;
+                node.style.textShadow = "none";
+                node.style.fontWeight = "700";
+                node.style.opacity = "1";
+            });
+        }
+
+        function renderTeacherEventInsights(info) {
+            const ext = info.event.extendedProps || {};
+            const subject = ext.subject || info.event.title || "-";
+            const createdBy = ext.creator_name || ext.creator_email || "Unknown";
+            const assignedByLabel = ext.assigned_by_label || "Published by";
+            const audience = ext.target || "ALL";
+            const eventType = ext.type || "general";
+            const eventTypeLabel = ext.type_label || eventType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+            const priority = ext.important ? "Important" : "Normal";
+            const dateStr = (info.event.startStr || "").slice(0, 10) || "-";
+            const box = document.getElementById("teacherEventInsights");
+            if (!box) return;
+            box.classList.remove("is-hidden");
+            box.innerHTML = `
+                <h4>Event Insights</h4>
+                <div class="teacher-event-grid">
+                    <div class="teacher-event-item"><div class="k">Title</div><div class="v">${info.event.title || "-"}</div></div>
+                    <div class="teacher-event-item"><div class="k">Subject</div><div class="v">${subject}</div></div>
+                    <div class="teacher-event-item"><div class="k">${assignedByLabel}</div><div class="v">${createdBy}</div></div>
+                    <div class="teacher-event-item"><div class="k">Date</div><div class="v">${dateStr}</div></div>
+                    <div class="teacher-event-item"><div class="k">Audience</div><div class="v">${audience}</div></div>
+                    <div class="teacher-event-item"><div class="k">Type</div><div class="v">${eventTypeLabel}</div></div>
+                    <div class="teacher-event-item"><div class="k">Priority</div><div class="v">${priority}</div></div>
+                </div>
+            `;
+        }
+
+        function sortRows(rows) {
+            return rows.slice().sort((a, b) => {
+                const d = (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99);
+                if (d !== 0) return d;
+                return (slotOrder[a.slot] || 99) - (slotOrder[b.slot] || 99);
+            });
+        }
+
+        function groupByDay(rows) {
+            const groups = {};
+            sortRows(rows).forEach(r => {
+                if (!groups[r.day]) groups[r.day] = [];
+                groups[r.day].push(r);
+            });
+            return groups;
+        }
+
+        function renderTeacherTimetable() {
+            const container = document.getElementById("teacherMyTimetableSummary");
+            if (!teacherMyRows.length) {
+                container.innerHTML = "<p style='color:#64748b;'>No timetable generated for your courses yet.</p>";
+                return;
+            }
+
+            const grouped = groupByDay(teacherMyRows);
+            const orderedDays = Object.keys(grouped).sort((a, b) => (dayOrder[a] || 99) - (dayOrder[b] || 99));
+            let html = "";
+
+            orderedDays.forEach(day => {
+                html += `<div class="tt-day-card">
+                            <div class="tt-day-head">
+                                <h4>On ${fullDayName[day] || day}, you have:</h4>
+                                <span class="tt-count">${grouped[day].length} class(es)</span>
+                            </div>
+                            <div class="tt-list">`;
+                grouped[day].forEach(r => {
+                    const label = r.label ? `<span class="tt-label">${r.label}</span>` : "";
+                    html += `<div class="tt-item">
+                                <div class="tt-slot">${r.slot}</div>
+                                <div>
+                                    <div class="tt-subject">${r.subject}${label}</div>
+                                    <div class="tt-meta">Room ${r.room} | Department: ${r.target}</div>
+                                </div>
+                            </div>`;
+                });
+                html += "</div></div>";
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderInstituteTimetable() {
+            const deptFilterEl = document.getElementById("teacherDeptFilter");
+            const dayFilterEl = document.getElementById("teacherDayFilter");
+            const selectedDept = deptFilterEl ? deptFilterEl.value : "ALL";
+            const selectedDay = dayFilterEl ? dayFilterEl.value : "ALL";
+            const rows = teacherInstituteRows.filter((r) => {
+                const matchDept = selectedDept === "ALL" || (r.target || "ALL").toUpperCase() === selectedDept;
+                const matchDay = selectedDay === "ALL" || (r.day || "") === selectedDay;
+                return matchDept && matchDay;
+            });
+
+            const container = document.getElementById("teacherInstituteTimetableSummary");
+            const countEl = document.getElementById("teacherFilterCount");
+            if (countEl) {
+                countEl.textContent = `Showing ${rows.length} class(es)`;
+            }
+
+            if (!rows.length) {
+                container.innerHTML = "<p style='color:#64748b;'>Institute timetable not generated yet.</p>";
+                return;
+            }
+
+            const grouped = groupByDay(rows);
+            const orderedDays = Object.keys(grouped).sort((a, b) => (dayOrder[a] || 99) - (dayOrder[b] || 99));
+            let html = "";
+
+            orderedDays.forEach(day => {
+                html += `<div class="tt-day-card">
+                            <div class="tt-day-head">
+                                <h4>On ${fullDayName[day] || day}, institute classes are:</h4>
+                                <span class="tt-count">${grouped[day].length} class(es)</span>
+                            </div>
+                            <div class="tt-list">`;
+                grouped[day].forEach(r => {
+                    const label = r.label ? `<span class="tt-label">${r.label}</span>` : "";
+                    html += `<div class="tt-item">
+                                <div class="tt-slot">${r.slot}</div>
+                                <div>
+                                    <div class="tt-subject">${r.subject}${label}</div>
+                                    <div class="tt-meta">${r.teacher} | Room ${r.room} | Department: ${r.target}</div>
+                                </div>
+                            </div>`;
+                });
+                html += "</div></div>";
+            });
+
+            container.innerHTML = html;
+        }
+
+        function initInstituteFilter() {
+            const deptFilter = document.getElementById("teacherDeptFilter");
+            const dayFilter = document.getElementById("teacherDayFilter");
+            const reset = document.getElementById("teacherDeptReset");
+            if (!deptFilter || !dayFilter || !reset) return;
+
+            const depts = [...new Set(teacherInstituteRows.map(r => (r.target || "ALL").toUpperCase()))].sort();
+            depts.forEach(d => {
+                if (d === "ALL") return;
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                deptFilter.appendChild(opt);
+            });
+
+            deptFilter.onchange = renderInstituteTimetable;
+            dayFilter.onchange = renderInstituteTimetable;
+            reset.onclick = () => {
+                deptFilter.value = "ALL";
+                dayFilter.value = "ALL";
+                renderInstituteTimetable();
+            };
+        }
+
+        function setCalendarMessage(message, tone = "info") {
+            const msg = document.getElementById("calendarActionMsg");
+            if (!msg) return;
+            msg.textContent = message || "";
+            msg.style.color = tone === "error" ? "#b42318" : "#1e429f";
+        }
+
+        function openTeacherEventModal(mode, data = {}) {
+            teacherEventMode = mode;
+            teacherEditingEventId = data.id || "";
+
+            document.getElementById("teacherEventModalTitle").textContent = mode === "edit" ? "Edit Event" : "Add Event";
+            document.getElementById("teacherEventName").value = data.title || "";
+            document.getElementById("teacherEventSubject").value = data.subject || "";
+            document.getElementById("teacherEventDate").value = data.date || "";
+            document.getElementById("teacherEventType").value = data.type || "general";
+            document.getElementById("teacherEventTarget").value = data.target || "{{ teacher_department | upper }}";
+            document.getElementById("teacherEventImportant").value = data.important ? "yes" : "no";
+            selectTeacherEventColor(data.customColor || "");
+            document.getElementById("teacherEventDeleteBtn").style.display = mode === "edit" ? "inline-block" : "none";
+            document.getElementById("teacherEventModalOverlay").classList.add("show");
+        }
+
+        function selectTeacherEventColor(color) {
+            teacherEventLabelColor = color || "";
+            const autoBtn = document.getElementById("teacherColorAutoBtn");
+            const chips = document.querySelectorAll("#teacherEventColorPicker .event-color-chip");
+
+            if (autoBtn) {
+                autoBtn.classList.toggle("active", !teacherEventLabelColor);
+            }
+            chips.forEach(chip => {
+                chip.classList.toggle("active", chip.dataset.color === teacherEventLabelColor);
+            });
+        }
+
+        function closeTeacherEventModal() {
+            document.getElementById("teacherEventModalOverlay").classList.remove("show");
+        }
+
+        function saveTeacherEvent() {
+            const title = document.getElementById("teacherEventName").value.trim();
+            const subject = document.getElementById("teacherEventSubject").value.trim();
+            const date = document.getElementById("teacherEventDate").value;
+            const eventType = document.getElementById("teacherEventType").value;
+            const target = document.getElementById("teacherEventTarget").value;
+            const important = document.getElementById("teacherEventImportant").value;
+
+            if (!title || !date) {
+                setCalendarMessage("Please fill event title and date.", "error");
+                return;
+            }
+
+            const endpoint = teacherEventMode === "edit" ? "/teacher/update_event" : "/teacher/add_event";
+            let body = `title=${encodeURIComponent(title)}&subject=${encodeURIComponent(subject)}&date=${encodeURIComponent(date)}&event_type=${encodeURIComponent(eventType)}&target=${encodeURIComponent(target)}&important=${encodeURIComponent(important)}&label_color=${encodeURIComponent(teacherEventLabelColor)}`;
+            if (teacherEventMode === "edit") {
+                body = `id=${encodeURIComponent(teacherEditingEventId)}&` + body;
+            }
+
+            fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const msg = (await res.text()) || "Unable to save calendar event.";
+                    throw new Error(msg);
+                }
+                closeTeacherEventModal();
+                setCalendarMessage("Calendar event saved successfully.");
+                if (calendar) calendar.refetchEvents();
+            }).catch((err) => {
+                setCalendarMessage(err.message || "No more than 3 events are allowed on this date.", "error");
+            });
+        }
+
+        function deleteTeacherEvent() {
+            if (!teacherEditingEventId) return;
+
+            fetch("/teacher/delete_event", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id=${encodeURIComponent(teacherEditingEventId)}`
+            }).then(() => {
+                closeTeacherEventModal();
+                setCalendarMessage("Event deleted.");
+                if (calendar) calendar.refetchEvents();
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("expanded");
+            document.getElementById("main").classList.toggle("shifted");
+        }
+
+        function showSection(id, el = null) {
+
+            // Hide all sections
+            document.querySelectorAll(".section").forEach(sec => {
+                sec.classList.remove("active");
+            });
+
+            // Show selected section
+            document.getElementById(id).classList.add("active");
+
+            document.querySelectorAll(".nav-link").forEach(link => link.classList.remove("active"));
+            if (el) {
+                el.classList.add("active");
+            } else {
+                const matched = document.querySelector(`.nav-link[data-section="${id}"]`);
+                if (matched) matched.classList.add("active");
+            }
+            updateLiveTeacherHeader();
+
+            // ===== ENTERPRISE CALENDAR LOGIC =====
+            if (id === "calendar") {
+
+                // Initialize only once
+                if (!calendarInitialized) {
+
+                    const calendarEl = document.getElementById('calendarUI');
+
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        height: "auto",
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek'
+                        },
+                        buttonText: {
+                            today: 'Today',
+                            month: 'Month',
+                            week: 'Week'
+                        },
+                        dayMaxEvents: 3,
+                        events: '/events',
+                        eventClassNames: function(info) {
+                            const classes = [];
+                            if (info.event.extendedProps && info.event.extendedProps.important) {
+                                classes.push("is-important");
+                            }
+                            if (
+                                info.event.extendedProps
+                                && info.event.extendedProps.type === "government_holiday"
+                            ) {
+                                classes.push("is-government-holiday");
+                            }
+                            return classes;
+                        },
+                        eventDidMount: function(info) {
+                            applyReadableEventStyle(info.el);
+                        },
+
+                        dateClick: function (info) {
+                            setCalendarMessage("");
+                            const box = document.getElementById("teacherEventInsights");
+                            if (box) box.classList.add("is-hidden");
+                            openTeacherEventModal("add", { date: info.dateStr, type: "general", target: "{{ teacher_department | upper }}", important: false });
+                        },
+
+                        eventClick: function(info) {
+                            const ev = info.event;
+                            renderTeacherEventInsights(info);
+                            const isOwner = ev.extendedProps && ev.extendedProps.is_owner;
+                            if (!isOwner) {
+                                setCalendarMessage("You can edit or delete only events created by you.", "error");
+                                return;
+                            }
+                            setCalendarMessage("");
+                            openTeacherEventModal("edit", {
+                                id: ev.id,
+                                title: ev.title,
+                                subject: ev.extendedProps.subject || "",
+                                date: ev.startStr.slice(0, 10),
+                                type: ev.extendedProps.type || "general",
+                                target: ev.extendedProps.target || "{{ teacher_department | upper }}",
+                                important: !!ev.extendedProps.important,
+                                customColor: ev.extendedProps.custom_color || ""
+                            });
+                        }
+                    });
+
+                    calendar.render();
+                    calendarInitialized = true;
+
+                } else {
+
+                    // If already initialized, just fix layout
+                    setTimeout(() => {
+                        calendar.updateSize();
+                    }, 150);
+                }
+            }
+        }
+
+        function openProfileSection(e) {
+            if (e) e.preventDefault();
+            const profileNav = document.getElementById("profileNavLink");
+            showSection("profile", profileNav);
+        }
+
+        lucide.createIcons();
+        updateLiveTeacherHeader();
+        setInterval(updateLiveTeacherHeader, 30000);
+        renderTeacherTimetable();
+        initInstituteFilter();
+        renderInstituteTimetable();
+
+    </script>
+
+</body>
+
+</html>
+
+
+

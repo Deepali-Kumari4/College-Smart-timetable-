@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  background:
+    radial-gradient(circle at 20% 16%, #ffffff 0%, rgba(255,255,255,0) 35%),
+    radial-gradient(circle at 83% 2%, #ecf2ff 0%, rgba(236,242,255,0) 30%),
+    linear-gradient(120deg, #f5f7fb, #e9edf7);
+  color: #14213d;
+}
+
+.wrap {
+  max-width: 860px;
+  margin: 36px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: rgba(255,255,255,.9);
+  border: 1px solid #dfe5f1;
+  border-radius: 16px;
+  box-shadow: 0 14px 34px rgba(15,23,42,.09);
+  padding: 24px;
+  backdrop-filter: blur(6px);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.top h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: .2px;
+}
+
+.sub {
+  font-size: 13px;
+  color: #5d6b90;
+  margin-top: 4px;
+}
+
+.avatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  overflow: hidden;
+  border: 3px solid #fff;
+  box-shadow: 0 10px 24px rgba(31,90,204,.28);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid #cfd8eb;
+  background: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2d6cdf;
+  box-shadow: 0 0 0 3px rgba(45,108,223,.15);
+}
+
+input[disabled] {
+  background: #f6f8fc;
+  color: #56607d;
+}
+
+.btn-primary {
+  margin-top: 14px;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #2d6cdf, #4d83f6);
+  color: #fff;
+  padding: 11px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+.btn-primary:hover {
+  filter: brightness(.98);
+}
+
+.bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  border: 1px solid #d2daeb;
+  background: #fff;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+.notice {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.ok {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.err {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <div>
+        <h2>My Profile</h2>
+        <div class="sub">Role: {{ role|capitalize }} | SmartTimetable Account Center</div>
+      </div>
+      <div class="avatar">
+        {% if profile_pic %}
+        <img src="{{ url_for('static', filename=profile_pic) }}" alt="Profile">
+        {% else %}
+        {{ name[:1] | upper }}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if message %}<div class="notice ok">{{ message }}</div>{% endif %}
+    {% if error %}<div class="notice err">{{ error }}</div>{% endif %}
+
+    <form action="/profile/update" method="POST" enctype="multipart/form-data">
+      <div class="grid">
+        <div class="field full">
+          <label>Email</label>
+          <input type="text" value="{{ email }}" disabled>
+        </div>
+
+        <div class="field">
+          <label>Name</label>
+          <input type="text" name="name" value="{{ name }}" required>
+        </div>
+
+        {% if role != "admin" %}
+        <div class="field">
+          <label>Department</label>
+          <select name="department">
+            <option {% if department == 'ALL' %}selected{% endif %}>ALL</option>
+            <option {% if department == 'CSE' %}selected{% endif %}>CSE</option>
+            <option {% if department == 'ECE' %}selected{% endif %}>ECE</option>
+            <option {% if department == 'IT' %}selected{% endif %}>IT</option>
+            <option {% if department == 'ME' %}selected{% endif %}>ME</option>
+          </select>
+        </div>
+        {% endif %}
+
+        <div class="field full">
+          <label>Profile Picture</label>
+          <input type="file" name="profile_pic" accept="image/*">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Save Profile</button>
+    </form>
+
+    <div class="bar">
+      {% if role == "admin" %}
+      <a class="btn" href="/admin/dashboard">Back to Dashboard</a>
+      {% elif role == "teacher" %}
+      <a class="btn" href="/teacher/dashboard">Back to Dashboard</a>
+      {% else %}
+      <a class="btn" href="/student/dashboard">Back to Dashboard</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</body>
+</html>

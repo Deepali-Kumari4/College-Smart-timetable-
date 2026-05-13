@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Portal – Smart Timetable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    Smart Timetable System – Teacher Portal
+</div>
+
+<div class="container">
+
+    <!-- LOGIN CARD -->
+    <div class="card">
+        <h2>Teacher Login</h2>
+        <p style="color:#666; font-size:14px;">
+            Please enter your registered name to access your dashboard.
+        </p>
+
+        <form method="POST" action="/teacher/login">
+            <label>Teacher Name</label>
+            <input type="text" name="teacher_name" placeholder="e.g. Natesha Sir" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card">
+        <h2>Submit Course Preferences</h2>
+        <p style="color:#666; font-size:14px;">
+            Enter course details and preferred teaching slots for the week.
+        </p>
+
+        <form action="/submit_teacher" method="post">
+
+            <!-- BASIC DETAILS -->
+            <label>Subject</label>
+            <input type="text" name="subject" placeholder="e.g. COA" required>
+
+            <label>Teacher Name</label>
+            <input type="text" name="teacher" placeholder="Must match login name" required>
+
+            <label>Number of Students</label>
+            <input type="number" name="students" required>
+
+            <hr>
+
+            <!-- CLASS 1 -->
+            <h3>Class 1 Preference</h3>
+
+            <label>Day</label>
+            <select name="day1">
+                <option value="-">None</option>
+                <option>Mon</option><option>Tue</option><option>Wed</option>
+                <option>Thu</option><option>Fri</option>
+            </select>
+
+            <label>Slot</label>
+            <select name="slot1">
+                <option value="-">None</option>
+                <option>S1</option><option>S2</option>
+                <option>S3</option><option>S4</option>
+            </select>
+
+            <hr>
+
+            <!-- CLASS 2 -->
+            <h3>Class 2 Preference</h3>
+
+            <label>Day</label>
+            <select name="day2">
+                <option value="-">None</option>
+                <option>Mon</option><option>Tue</option><option>Wed</option>
+                <option>Thu</option><option>Fri</option>
+            </select>
+
+            <label>Slot</label>
+            <select name="slot2">
+                <option value="-">None</option>
+                <option>S1</option><option>S2</option>
+                <option>S3</option><option>S4</option>
+            </select>
+
+            <hr>
+
+            <!-- CLASS 3 -->
+            <h3>Class 3 Preference</h3>
+
+            <label>Day</label>
+            <select name="day3">
+                <option value="-">None</option>
+                <option>Mon</option><option>Tue</option><option>Wed</option>
+                <option>Thu</option><option>Fri</option>
+            </select>
+
+            <label>Slot</label>
+            <select name="slot3">
+                <option value="-">None</option>
+                <option>S1</option><option>S2</option>
+                <option>S3</option><option>S4</option>
+            </select>
+
+            <button type="submit">Save Preferences</button>
+
+        </form>
+    </div>
+
+    <a href="/" style="font-size:14px;">← Back to Admin</a>
+
+</div>
+
+</body>
+</html>

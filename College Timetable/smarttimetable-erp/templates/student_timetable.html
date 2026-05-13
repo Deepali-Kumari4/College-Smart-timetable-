@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Timetable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+        }
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+        }
+        .container {
+            padding: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #e2e8f0;
+        }
+        .back {
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    Student Dashboard – Timetable
+</div>
+
+<div class="container">
+
+    <a class="back" href="/student/dashboard">← Back to Dashboard</a>
+
+    {% if timetable %}
+    <table>
+        <tr>
+            <th>Day</th>
+            <th>Slot</th>
+            <th>Subject</th>
+            <th>Room</th>
+        </tr>
+
+        {% for row in timetable %}
+        <tr>
+            <td>{{ row.day }}</td>
+            <td>{{ row.slot }}</td>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.room }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No timetable generated yet.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

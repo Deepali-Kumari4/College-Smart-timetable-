@@ -1,0 +1,7 @@
+Math,T1,40,ALL,-:-,-:-,-:-
+Physics,T2,35,ALL,-:-,-:-,-:-
+CS,T3,30,ALL,-:-,-:-,-:-
+Introduction to computer science,Janhvi Tiwari,50,CSE,Mon:S1,Wed:S2,Fri:S4
+Embedded system,Janhvi Tiwari,50,ECE,Wed:S3,Fri:S4,-:-
+Mac Layer protocol,Janhvi Tiwari,50,CSE,Tue:S1,Thu:S2,Fri:S4
+Engineering Mathematics (Core Foundation),Arnav Ghosh,50,CSE,Mon:S1,Wed:S3,Fri:S4

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Timetable Entry</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6fb;
+    color: #0f172a;
+}
+.wrap {
+    max-width: 760px;
+    margin: 26px auto;
+    padding: 0 14px;
+}
+.card {
+    background: #fff;
+    border: 1px solid #dbe4f2;
+    border-radius: 12px;
+    padding: 18px;
+}
+h2 {
+    margin: 0 0 6px 0;
+}
+p {
+    margin: 0 0 14px 0;
+    color: #475569;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.full {
+    grid-column: 1 / -1;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #334155;
+}
+input, select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #cdd8ea;
+    border-radius: 8px;
+    padding: 10px;
+}
+.actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+}
+button, .back {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+}
+button {
+    background: #2563eb;
+    color: #fff;
+}
+.back {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+@media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h2>Edit Timetable Entry</h2>
+        <p>Update this row and save changes.</p>
+
+        <form method="POST" action="/admin/timetable/edit">
+            <input type="hidden" name="old_day" value="{{ old_day }}">
+            <input type="hidden" name="old_slot" value="{{ old_slot }}">
+            <input type="hidden" name="old_subject" value="{{ old_subject }}">
+            <input type="hidden" name="old_room" value="{{ old_room }}">
+            <input type="hidden" name="old_teacher" value="{{ old_teacher }}">
+            <input type="hidden" name="old_target" value="{{ old_target }}">
+            <input type="hidden" name="source_section" value="{{ source_section }}">
+
+            <div class="grid">
+                <div>
+                    <label>Day</label>
+                    <select name="day">
+                        <option {% if row.day == "Mon" %}selected{% endif %}>Mon</option>
+                        <option {% if row.day == "Tue" %}selected{% endif %}>Tue</option>
+                        <option {% if row.day == "Wed" %}selected{% endif %}>Wed</option>
+                        <option {% if row.day == "Thu" %}selected{% endif %}>Thu</option>
+                        <option {% if row.day == "Fri" %}selected{% endif %}>Fri</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Slot</label>
+                    <select name="slot">
+                        <option {% if row.slot == "S1" %}selected{% endif %}>S1</option>
+                        <option {% if row.slot == "S2" %}selected{% endif %}>S2</option>
+                        <option {% if row.slot == "S3" %}selected{% endif %}>S3</option>
+                        <option {% if row.slot == "S4" %}selected{% endif %}>S4</option>
+                    </select>
+                </div>
+                <div class="full">
+                    <label>Subject</label>
+                    <input type="text" name="subject" value="{{ row.subject }}" required>
+                </div>
+                <div>
+                    <label>Teacher</label>
+                    <input type="text" name="teacher" value="{{ row.teacher }}" required>
+                </div>
+                <div>
+                    <label>Room</label>
+                    <input type="text" name="room" value="{{ row.room }}" required>
+                </div>
+                <div>
+                    <label>Target Department</label>
+                    <select name="target">
+                        <option {% if row.target == "ALL" %}selected{% endif %}>ALL</option>
+                        <option {% if row.target == "CSE" %}selected{% endif %}>CSE</option>
+                        <option {% if row.target == "ECE" %}selected{% endif %}>ECE</option>
+                        <option {% if row.target == "IT" %}selected{% endif %}>IT</option>
+                        <option {% if row.target == "ME" %}selected{% endif %}>ME</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Label</label>
+                    <input type="text" name="label" value="{{ row.label }}">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit">Save Changes</button>
+                <a class="back" href="/admin/dashboard?section={{ source_section }}">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

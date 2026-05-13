@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Event</title>
+<style>
+body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
+.wrap { max-width: 700px; margin: 30px auto; padding: 0 16px; }
+.card { background: #fff; border: 1px solid #dfe5f1; border-radius: 12px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+label { display: block; font-size: 13px; color: #475569; margin-top: 10px; }
+input, select { width: 100%; margin-top: 6px; padding: 10px; border-radius: 8px; border: 1px solid #cfd8eb; box-sizing: border-box; }
+button { margin-top: 14px; border: none; border-radius: 8px; background: #2563eb; color: #fff; padding: 10px 12px; cursor: pointer; width: 100%; }
+a { display: inline-block; margin-top: 10px; color: #1e40af; text-decoration: none; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h2 style="margin-top:0;">Edit Calendar Event</h2>
+        <form method="POST" action="/admin/events/edit?id={{ event.id }}">
+            <label>Title</label>
+            <input type="text" name="title" value="{{ event.title }}" required>
+
+            <label>Date</label>
+            <input type="date" name="date" value="{{ event.date }}" required>
+
+            <label>Type</label>
+            <select name="event_type">
+                <option value="general" {% if event.type == "general" %}selected{% endif %}>General</option>
+                <option value="test" {% if event.type == "test" %}selected{% endif %}>Test</option>
+                <option value="exam" {% if event.type == "exam" %}selected{% endif %}>Exam</option>
+                <option value="vacation" {% if event.type == "vacation" %}selected{% endif %}>Holiday / Leave</option>
+            </select>
+
+            <label>Importance</label>
+            <select name="important">
+                <option value="no" {% if not event.important %}selected{% endif %}>Normal</option>
+                <option value="yes" {% if event.important %}selected{% endif %}>Important</option>
+            </select>
+
+            <button type="submit">Save Event</button>
+        </form>
+        <a href="/admin/dashboard">Back to Dashboard</a>
+    </div>
+</div>
+</body>
+</html>

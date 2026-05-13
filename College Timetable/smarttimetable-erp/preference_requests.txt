@@ -1,0 +1,2 @@
+raju sir|information techonolgy,Information techonolgy,Raju Sir,60,IT,Tue:S1,Mon:S2,Fri:S3
+raju sir|java,Java,Raju Sir,46,IT,Mon:S1,Wed:S2,Fri:S3

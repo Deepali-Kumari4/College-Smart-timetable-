@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartTimetable Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-1: #07122a;
+            --bg-2: #101f3f;
+            --panel-dark-1: #11213f;
+            --panel-dark-2: #1d3257;
+            --line: #d9e2f1;
+            --text-main: #1a2b4a;
+            --text-muted: #5a6d8e;
+            --accent-1: #2b6de6;
+            --accent-2: #1e52c1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Manrope', 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(900px 500px at 6% 2%, rgba(45, 113, 255, 0.22), transparent 60%),
+                radial-gradient(1000px 560px at 96% 100%, rgba(59, 130, 246, 0.18), transparent 62%),
+                linear-gradient(140deg, var(--bg-1), var(--bg-2));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            padding: 16px;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: min(1080px, 100%);
+            max-height: calc(100vh - 32px);
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(180, 198, 227, 0.35);
+            box-shadow: 0 30px 70px rgba(3, 11, 31, 0.55);
+            animation: card-in 0.55s ease;
+        }
+
+        .left-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(130deg, var(--panel-dark-1), var(--panel-dark-2));
+            color: #f1f5f9;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            isolation: isolate;
+        }
+
+        .left-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('/static/login-bg.png') center center/cover no-repeat;
+            opacity: 0.30;
+            filter: brightness(1.2) contrast(1.08) saturate(1.02);
+            z-index: 0;
+        }
+
+        .left-panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(145deg, rgba(8, 13, 27, 0.65), rgba(19, 32, 58, 0.5)),
+                radial-gradient(500px 260px at 80% 18%, rgba(87, 149, 255, 0.2), transparent 75%);
+            z-index: 0;
+        }
+
+        .left-panel>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .kicker {
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.13);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #dbeafe;
+        }
+
+        .left-panel h1 {
+            margin: 0;
+            font-family: 'Sora', 'Manrope', sans-serif;
+            font-size: clamp(32px, 3.7vw, 44px);
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            line-height: 1.12;
+        }
+
+        .left-panel p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.75;
+            color: rgba(238, 246, 255, 0.92);
+            max-width: 520px;
+        }
+
+        .left-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 4px;
+        }
+
+        .left-meta span {
+            font-size: 12px;
+            color: #dbeafe;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 30px 34px;
+            background: linear-gradient(180deg, #fcfdff, #f7faff);
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            margin-top: 0;
+            margin-bottom: 14px;
+            color: var(--text-main);
+            font-family: 'Sora', 'Manrope', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
+        }
+
+        .notice {
+            border-radius: 12px;
+            padding: 11px 13px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .notice.error {
+            background: #fef2f2;
+            color: #a30f2d;
+            border: 1px solid #fecdd3;
+        }
+
+        .notice.ok {
+            background: #ecfdf3;
+            color: #0f6a3f;
+            border: 1px solid #b7f2cc;
+        }
+
+        form {
+            display: none;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        form.active {
+            display: flex;
+            animation: form-in 0.22s ease;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 3px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            font-size: 14px;
+            color: #102244;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+            margin-bottom: 8px;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--accent-1);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(43, 109, 230, 0.16);
+            transform: translateY(-1px);
+        }
+
+        button[type="submit"] {
+            margin-top: 8px;
+            height: 44px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(40, 98, 210, 0.26);
+            transition: transform 0.16s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(40, 98, 210, 0.33);
+            filter: brightness(1.02);
+        }
+
+        .switch-link {
+            margin-top: 7px;
+            border: none;
+            background: transparent;
+            color: var(--accent-1);
+            font-size: 14px;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .switch-link:hover {
+            text-decoration: underline;
+        }
+
+        .oauth-divider {
+            position: relative;
+            margin: 14px 0 10px;
+            text-align: center;
+            color: #7a8ba8;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .oauth-divider::before,
+        .oauth-divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #d6e0f1;
+        }
+
+        .oauth-divider::before {
+            left: 0;
+        }
+
+        .oauth-divider::after {
+            right: 0;
+        }
+
+        .google-btn {
+            margin-top: 0;
+            height: 42px;
+            width: 100%;
+            border: 1px solid #d1dceb;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #1a2b4a;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .google-btn:hover {
+            background: #f7faff;
+            transform: translateY(-1px);
+            box-shadow: 0 7px 16px rgba(71, 98, 141, 0.16);
+        }
+
+        .google-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.62;
+            background: #f2f5fb;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .google-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .input-with-toggle {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .input-with-toggle input {
+            margin-bottom: 0;
+            padding-right: 56px;
+        }
+
+        /* Hide browser-native password reveal controls to avoid duplicate icons. */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button,
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(90, 109, 142, 0.12);
+            color: #556987;
+            border-radius: 999px;
+            height: 28px;
+            width: 28px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: none;
+            transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+        }
+
+        .toggle-pass:hover {
+            background: rgba(90, 109, 142, 0.2);
+            color: #334155;
+        }
+
+        .toggle-pass:focus {
+            outline: none;
+            background: rgba(43, 109, 230, 0.14);
+            color: #1e52c1;
+        }
+
+        .input-with-toggle input:focus + .toggle-pass {
+            background: rgba(43, 109, 230, 0.14);
+            color: #1e52c1;
+        }
+
+        .toggle-pass svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .toggle-pass .eye-pupil {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .field-hint {
+            margin: -2px 0 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .config-hint {
+            margin-top: -2px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #8a2d2d;
+            font-weight: 600;
+        }
+
+        .inline-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .inline-row button {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            margin-top: 8px;
+            height: 44px;
+            background: #eef3ff;
+            color: #1a3f92;
+            border: 1px solid #cfdbfa;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.18s ease, transform 0.16s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e6eeff;
+            transform: translateY(-1px);
+        }
+
+        @keyframes card-in {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.985);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes form-in {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width: 960px) {
+            body {
+                height: auto;
+                overflow: auto;
+                padding: 12px;
+            }
+
+            .login-wrapper {
+                flex-direction: column;
+                max-height: none;
+            }
+
+            .left-panel {
+                min-height: 320px;
+                padding: 30px 26px;
+            }
+
+            .right-panel {
+                padding: 24px;
+                overflow: visible;
+            }
+
+            .panel-title {
+                font-size: 30px;
+            }
+        }
+
+        @media(max-width: 540px) {
+            body {
+                padding: 14px;
+            }
+
+            .left-panel h1 {
+                font-size: 30px;
+            }
+
+            .left-panel p {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-height: 820px) and (min-width: 961px) {
+            .left-panel {
+                padding: 28px;
+                gap: 12px;
+            }
+
+            .left-panel h1 {
+                font-size: clamp(28px, 3.2vw, 38px);
+            }
+
+            .left-panel p {
+                font-size: 15px;
+                line-height: 1.55;
+            }
+
+            .left-meta span {
+                padding: 5px 9px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+        <div class="left-panel">
+            <div class="kicker">Academic Operations Suite</div>
+            <h1>SmartTimetable</h1>
+            <p>
+                Built for modern institutions with optimization-first scheduling,
+                teacher-preference intelligence, conflict-proof planning, and
+                role-driven academic workflows.
+            </p>
+            <div class="left-meta">
+                <span>ILP Optimization</span>
+                <span>Faculty Preferences</span>
+                <span>Conflict Safe</span>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2 id="panel-title" class="panel-title">Portal Login</h2>
+
+            {% if error %}
+            <div class="notice error">{{ error }}</div>
+            {% endif %}
+            {% if message %}
+            <div class="notice ok">{{ message }}</div>
+            {% endif %}
+            <div class="notice" id="ui-feedback" style="display:none;"></div>
+
+            <form method="POST" action="/login" id="login-form" class="active">
+                <label>Login As</label>
+                <select name="role" required>
+                    <option value="">-- Select Role --</option>
+                    <option value="admin">Admin</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="example@iiitr.ac.in" required>
+
+                <label>Password</label>
+                <div class="input-with-toggle">
+                    <input type="password" id="login-password" name="password" placeholder="Enter password" required>
+                    <button class="toggle-pass" type="button" data-target="login-password" aria-label="Show password" title="Show password"></button>
+                </div>
+
+                <button type="submit">Login</button>
+                <div class="oauth-divider">or</div>
+                <button type="button" class="google-btn" id="google-login-btn" {% if not google_enabled %}disabled{% endif %}>
+                    <svg viewBox="0 0 533.5 544.3" aria-hidden="true">
+                        <path fill="#4285f4" d="M533.5 278.4c0-18.5-1.6-37-5.1-54.9H272v103.9h146.9c-6.3 34.2-25.3 63.1-53.8 82.4v68h86.9c50.9-46.9 81.5-116.1 81.5-199.4z"/>
+                        <path fill="#34a853" d="M272 544.3c72.8 0 133.9-24.1 178.5-65.5l-86.9-68c-24.1 16.2-55.1 25.7-91.6 25.7-70.4 0-130-47.5-151.3-111.3H31.1v69.9c45.7 90.9 139.7 149.2 240.9 149.2z"/>
+                        <path fill="#fbbc04" d="M120.7 325.2c-10.8-32.1-10.8-66.3 0-98.4V156.9H31.1c-38.5 76.7-38.5 153.9 0 230.6l89.6-62.3z"/>
+                        <path fill="#ea4335" d="M272 107.7c39.6-.6 77.8 14.3 107 41.8l79.8-79.8C409.7 24.5 343.6-1 272 0 170.8 0 76.8 58.3 31.1 149.2l89.6 69.9C142 155.2 201.6 107.7 272 107.7z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                {% if not google_enabled %}
+                <div class="config-hint">Google login disabled. Missing: {{ google_missing }}</div>
+                {% endif %}
+                <button class="switch-link" type="button" id="to-phone-login">Login with phone OTP</button>
+                <button class="switch-link" type="button" id="to-forgot">Forgot password?</button>
+                <button class="switch-link" type="button" id="to-signup">Need an account? Sign up</button>
+            </form>
+
+            <form method="POST" action="#" id="phone-form">
+                <label>Role</label>
+                <select name="role" required>
+                    <option value="">-- Select Role --</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+
+                <label>Approved Email</label>
+                <input type="email" name="email" placeholder="example@iiitr.ac.in" required>
+
+                <label>Phone Number</label>
+                <input type="tel" name="phone" placeholder="10-digit Indian number" required>
+
+                <label>OTP Code</label>
+                <input type="text" name="otp" placeholder="Enter 6-digit OTP" inputmode="numeric" pattern="[0-9]{4,8}" required>
+                <div class="field-hint">OTP expires in 5 minutes. Resend cooldown is 30 seconds.</div>
+
+                <div class="inline-row">
+                    <button type="button" class="btn-secondary" id="send-otp-btn">Send OTP</button>
+                    <button type="submit">Verify OTP & Login</button>
+                </div>
+                <button class="switch-link" type="button" id="phone-to-login">Back to password login</button>
+                <button class="switch-link" type="button" id="phone-to-signup">Need account approval first? Sign up</button>
+            </form>
+
+            <form method="POST" action="/signup" id="signup-form">
+                <label>Sign Up As</label>
+                <select name="role" required>
+                    <option value="">-- Select Role --</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Your name" required>
+
+                <label>Department</label>
+                <input type="text" name="department" placeholder="CSE / ECE / IT" required>
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="example@iiitr.ac.in" required>
+
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Create password" required>
+
+                <button type="submit">Submit For Admin Approval</button>
+                <div class="oauth-divider">or</div>
+                <button type="button" class="google-btn" id="google-signup-btn" {% if not google_enabled %}disabled{% endif %}>
+                    <svg viewBox="0 0 533.5 544.3" aria-hidden="true">
+                        <path fill="#4285f4" d="M533.5 278.4c0-18.5-1.6-37-5.1-54.9H272v103.9h146.9c-6.3 34.2-25.3 63.1-53.8 82.4v68h86.9c50.9-46.9 81.5-116.1 81.5-199.4z"/>
+                        <path fill="#34a853" d="M272 544.3c72.8 0 133.9-24.1 178.5-65.5l-86.9-68c-24.1 16.2-55.1 25.7-91.6 25.7-70.4 0-130-47.5-151.3-111.3H31.1v69.9c45.7 90.9 139.7 149.2 240.9 149.2z"/>
+                        <path fill="#fbbc04" d="M120.7 325.2c-10.8-32.1-10.8-66.3 0-98.4V156.9H31.1c-38.5 76.7-38.5 153.9 0 230.6l89.6-62.3z"/>
+                        <path fill="#ea4335" d="M272 107.7c39.6-.6 77.8 14.3 107 41.8l79.8-79.8C409.7 24.5 343.6-1 272 0 170.8 0 76.8 58.3 31.1 149.2l89.6 69.9C142 155.2 201.6 107.7 272 107.7z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+                {% if not google_enabled %}
+                <div class="config-hint">Google signup disabled. Missing: {{ google_missing }}</div>
+                {% endif %}
+                <button class="switch-link" type="button" id="signup-to-forgot">Forgot password?</button>
+                <button class="switch-link" type="button" id="to-login">Already approved? Back to login</button>
+            </form>
+
+            <form method="POST" action="/forgot-password" id="forgot-form">
+                <label>Registered Role</label>
+                <select name="role" required>
+                    <option value="">-- Select Role --</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+
+                <label>Registered Email</label>
+                <input type="email" name="email" placeholder="example@iiitr.ac.in" required>
+
+                <label>New Password</label>
+                <div class="input-with-toggle">
+                    <input type="password" id="new-password" name="new_password" placeholder="Enter new password" required>
+                    <button class="toggle-pass" type="button" data-target="new-password" aria-label="Show password" title="Show password"></button>
+                </div>
+                <div class="field-hint">Use at least 8 characters with uppercase, lowercase, and number.</div>
+
+                <label>Confirm Password</label>
+                <div class="input-with-toggle">
+                    <input type="password" id="confirm-password" name="confirm_password" placeholder="Re-enter new password" required>
+                    <button class="toggle-pass" type="button" data-target="confirm-password" aria-label="Show password" title="Show password"></button>
+                </div>
+
+                <button type="submit">Reset Password</button>
+                <button class="switch-link" type="button" id="forgot-to-login">Back to login</button>
+                <button class="switch-link" type="button" id="forgot-to-signup">Need account approval first? Sign up</button>
+            </form>
+
+            <div class="footer-note">
+                Account access for Teacher and Student is enabled only after admin approval.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panelTitle = document.getElementById("panel-title");
+        const loginForm = document.getElementById("login-form");
+        const phoneForm = document.getElementById("phone-form");
+        const signupForm = document.getElementById("signup-form");
+        const forgotForm = document.getElementById("forgot-form");
+        const toSignup = document.getElementById("to-signup");
+        const toLogin = document.getElementById("to-login");
+        const toForgot = document.getElementById("to-forgot");
+        const toPhoneLogin = document.getElementById("to-phone-login");
+        const signupToForgot = document.getElementById("signup-to-forgot");
+        const forgotToLogin = document.getElementById("forgot-to-login");
+        const forgotToSignup = document.getElementById("forgot-to-signup");
+        const phoneToLogin = document.getElementById("phone-to-login");
+        const phoneToSignup = document.getElementById("phone-to-signup");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const googleSignupBtn = document.getElementById("google-signup-btn");
+        const sendOtpBtn = document.getElementById("send-otp-btn");
+        const uiFeedback = document.getElementById("ui-feedback");
+
+        function showUiMessage(kind, text) {
+            if (!uiFeedback) return;
+            uiFeedback.className = `notice ${kind === "ok" ? "ok" : "error"}`;
+            uiFeedback.textContent = text || "";
+            uiFeedback.style.display = text ? "block" : "none";
+        }
+
+        function showTab(tab) {
+            const onLogin = tab === "login";
+            const onPhone = tab === "phone";
+            const onSignup = tab === "signup";
+            const onForgot = tab === "forgot";
+            loginForm.classList.toggle("active", onLogin);
+            phoneForm.classList.toggle("active", onPhone);
+            signupForm.classList.toggle("active", onSignup);
+            forgotForm.classList.toggle("active", onForgot);
+            panelTitle.textContent = onLogin
+                ? "Portal Login"
+                : onPhone
+                    ? "Phone OTP Login"
+                : onSignup
+                    ? "Create Account Request"
+                    : "Reset Password";
+            showUiMessage("error", "");
+        }
+
+        toSignup.onclick = () => showTab("signup");
+        toLogin.onclick = () => showTab("login");
+        toForgot.onclick = () => showTab("forgot");
+        toPhoneLogin.onclick = () => showTab("phone");
+        signupToForgot.onclick = () => showTab("forgot");
+        forgotToLogin.onclick = () => showTab("login");
+        forgotToSignup.onclick = () => showTab("signup");
+        phoneToLogin.onclick = () => showTab("login");
+        phoneToSignup.onclick = () => showTab("signup");
+        googleLoginBtn.onclick = () => {
+            const roleSelect = loginForm.querySelector('select[name="role"]');
+            const emailInput = loginForm.querySelector('input[name="email"]');
+            const role = (roleSelect && roleSelect.value) ? roleSelect.value : "";
+            const email = (emailInput && emailInput.value) ? emailInput.value.trim().toLowerCase() : "";
+            if (!role || role === "admin") {
+                showUiMessage("error", "Select Teacher or Student role for Google login.");
+                return;
+            }
+            let url = `/auth/google?mode=login&role=${encodeURIComponent(role)}`;
+            if (email) {
+                url += `&login_hint=${encodeURIComponent(email)}`;
+            }
+            window.location.href = url;
+        };
+        googleSignupBtn.onclick = () => {
+            const roleSelect = signupForm.querySelector('select[name="role"]');
+            const deptInput = signupForm.querySelector('input[name="department"]');
+            const role = (roleSelect && roleSelect.value) ? roleSelect.value : "";
+            const department = (deptInput && deptInput.value) ? deptInput.value.trim().toUpperCase() : "";
+            if (!role) {
+                showUiMessage("error", "Select Teacher or Student role for Google signup.");
+                return;
+            }
+            if (!department) {
+                showUiMessage("error", "Enter department for Google signup.");
+                return;
+            }
+            window.location.href = `/auth/google?mode=signup&role=${encodeURIComponent(role)}&department=${encodeURIComponent(department)}`;
+        };
+
+        function getEyeIcon(visible) {
+            if (visible) {
+                return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle class="eye-pupil" cx="12" cy="12" r="2"></circle></svg>';
+            }
+            return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle class="eye-pupil" cx="12" cy="12" r="2"></circle><path d="M4 20L20 4"></path></svg>';
+        }
+
+        document.querySelectorAll(".toggle-pass").forEach((btn) => {
+            btn.dataset.visible = "false";
+            btn.innerHTML = getEyeIcon(false);
+            btn.onclick = () => {
+                const input = document.getElementById(btn.dataset.target);
+                if (!input) return;
+                const nextType = input.type === "password" ? "text" : "password";
+                input.type = nextType;
+                const visible = nextType === "text";
+                btn.dataset.visible = visible ? "true" : "false";
+                btn.innerHTML = getEyeIcon(visible);
+                btn.setAttribute("aria-label", visible ? "Hide password" : "Show password");
+                btn.setAttribute("title", visible ? "Hide password" : "Show password");
+            };
+        });
+
+        sendOtpBtn.onclick = async () => {
+            const role = phoneForm.querySelector('select[name="role"]').value;
+            const email = phoneForm.querySelector('input[name="email"]').value.trim();
+            const phone = phoneForm.querySelector('input[name="phone"]').value.trim();
+            if (!role || !email || !phone) {
+                showUiMessage("error", "Select role and enter approved email + phone first.");
+                return;
+            }
+            const payload = new URLSearchParams({ role, email, phone });
+            try {
+                const res = await fetch("/auth/phone/send-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: payload.toString()
+                });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    showUiMessage("error", data.error || "Unable to send OTP.");
+                    return;
+                }
+                showUiMessage("ok", data.message || "OTP sent.");
+            } catch (err) {
+                showUiMessage("error", "Unable to send OTP right now.");
+            }
+        };
+
+        phoneForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const role = phoneForm.querySelector('select[name="role"]').value;
+            const email = phoneForm.querySelector('input[name="email"]').value.trim();
+            const phone = phoneForm.querySelector('input[name="phone"]').value.trim();
+            const otp = phoneForm.querySelector('input[name="otp"]').value.trim();
+            const payload = new URLSearchParams({ role, email, phone, otp });
+            try {
+                const res = await fetch("/auth/phone/verify-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: payload.toString()
+                });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    showUiMessage("error", data.error || "OTP verification failed.");
+                    return;
+                }
+                window.location.href = data.redirect || "/login";
+            } catch (err) {
+                showUiMessage("error", "Unable to verify OTP right now.");
+            }
+        };
+    </script>
+
+</body>
+
+</html>

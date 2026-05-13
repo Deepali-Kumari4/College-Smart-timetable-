@@ -1,0 +1,222 @@
+/* ===============================
+   GLOBAL RESET & BASE
+   =============================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+/* ===============================
+   HEADER
+   =============================== */
+
+.header {
+    background: linear-gradient(90deg, #1a73e8, #1558b0);
+    color: white;
+    padding: 18px 32px;
+    font-size: 20px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+
+/* ===============================
+   LAYOUT
+   =============================== */
+
+.container {
+    width: 92%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.5s ease;
+}
+
+
+/* ===============================
+   HEADINGS
+   =============================== */
+
+h1, h2, h3 {
+    margin-top: 0;
+    font-weight: 500;
+}
+
+h2 {
+    font-size: 22px;
+}
+
+h3 {
+    font-size: 17px;
+    margin-top: 20px;
+    color: #444;
+}
+
+
+/* ===============================
+   TEXT
+   =============================== */
+
+p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+
+/* ===============================
+   FORMS
+   =============================== */
+
+label {
+    display: block;
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid #cfd4dc;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e6ed;
+    margin: 25px 0;
+}
+
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin-top: 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background: #1558b0;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+
+/* ===============================
+   TABLES
+   =============================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th {
+    background: #eef3fc;
+    text-align: left;
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 2px solid #d9e2f3;
+}
+
+td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #e1e4ea;
+}
+
+tr:hover {
+    background: #f8fbff;
+}
+
+
+/* ===============================
+   SMALL LINKS / FOOTERS
+   =============================== */
+
+.footer-link {
+    font-size: 13px;
+    color: #666;
+}
+
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 768px) {
+    .header {
+        font-size: 18px;
+        padding: 15px 20px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+}
+

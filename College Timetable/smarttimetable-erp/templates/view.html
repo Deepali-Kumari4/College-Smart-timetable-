@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Submitted Courses</title>
+</head>
+<body>
+
+<h2>Submitted Course Data</h2>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Course</th>
+        <th>Teacher</th>
+        <th>Students</th>
+        <th>Preferences</th>
+        <th>Edit</th>
+    </tr>
+
+    {% for row in rows %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3:] }}</td>
+        <td>
+            <a href="/teacher/edit?course={{ row[0] }}">Edit</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<a href="/teacher">Back to Teacher Page</a>
+
+</body>
+</html>

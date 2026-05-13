@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Preference Request</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
+.wrap { max-width: 900px; margin: 30px auto; padding: 20px; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 24px; }
+h2 { margin-top: 0; color: #1e293b; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+label { display: block; font-size: 13px; color: #475569; margin-bottom: 6px; }
+input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+.slot-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+.actions { margin-top: 18px; display: flex; gap: 10px; }
+button, a.btn { border: none; border-radius: 8px; padding: 10px 16px; text-decoration: none; cursor: pointer; font-size: 14px; }
+button { background: #2563eb; color: #fff; }
+a.btn { background: #e2e8f0; color: #1e293b; }
+.notice.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h2>Edit Preference Request</h2>
+        {% if error %}
+        <div class="notice error">{{ error }}</div>
+        {% endif %}
+        <p style="color:#64748b;">Teacher: <b>{{ req.teacher }}</b></p>
+        <form method="POST" action="/admin/preferences/edit?id={{ req.id }}">
+            <div class="grid">
+                <div>
+                    <label>Subject</label>
+                    <input type="text" name="subject" value="{{ req.subject }}" required>
+                </div>
+                <div>
+                    <label>Students</label>
+                    <input type="number" name="students" value="{{ req.students }}" required>
+                </div>
+                <div>
+                    <label>Target Department</label>
+                    <select name="target">
+                        <option {% if req.target == 'ALL' %}selected{% endif %}>ALL</option>
+                        <option {% if req.target == 'CSE' %}selected{% endif %}>CSE</option>
+                        <option {% if req.target == 'ECE' %}selected{% endif %}>ECE</option>
+                        <option {% if req.target == 'IT' %}selected{% endif %}>IT</option>
+                        <option {% if req.target == 'ME' %}selected{% endif %}>ME</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid" style="margin-top:14px;">
+                {% for i in [0,1,2] %}
+                <div class="slot-card">
+                    <label>Class {{ i + 1 }} Day</label>
+                    <select name="day{{ i + 1 }}">
+                        <option {% if day_slot[i][0] == '-' %}selected{% endif %}>-</option>
+                        <option {% if day_slot[i][0] == 'Mon' %}selected{% endif %}>Mon</option>
+                        <option {% if day_slot[i][0] == 'Tue' %}selected{% endif %}>Tue</option>
+                        <option {% if day_slot[i][0] == 'Wed' %}selected{% endif %}>Wed</option>
+                        <option {% if day_slot[i][0] == 'Thu' %}selected{% endif %}>Thu</option>
+                        <option {% if day_slot[i][0] == 'Fri' %}selected{% endif %}>Fri</option>
+                    </select>
+
+                    <label style="margin-top:10px;">Class {{ i + 1 }} Slot</label>
+                    <select name="slot{{ i + 1 }}">
+                        <option {% if day_slot[i][1] == '-' %}selected{% endif %}>-</option>
+                        <option {% if day_slot[i][1] == 'S1' %}selected{% endif %}>S1</option>
+                        <option {% if day_slot[i][1] == 'S2' %}selected{% endif %}>S2</option>
+                        <option {% if day_slot[i][1] == 'S3' %}selected{% endif %}>S3</option>
+                        <option {% if day_slot[i][1] == 'S4' %}selected{% endif %}>S4</option>
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="actions">
+                <button type="submit">Save Changes</button>
+                <a class="btn" href="/admin/dashboard">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

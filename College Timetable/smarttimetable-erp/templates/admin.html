@@ -1,0 +1,2732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<style>
+:root {
+    --bg-1: #f5f7fb;
+    --bg-2: #e9edf7;
+    --ink: #14213d;
+    --muted: #5b6787;
+    --side-1: #0b132b;
+    --side-2: #1c2541;
+    --accent: #2d6cdf;
+    --line: #dfe5f1;
+    --card: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+        radial-gradient(circle at 18% 22%, #ffffff 0%, rgba(255,255,255,0) 35%),
+        radial-gradient(circle at 82% 2%, #edf2ff 0%, rgba(237,242,255,0) 28%),
+        linear-gradient(120deg, var(--bg-1), var(--bg-2));
+    color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout { display: flex; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 78px;
+    background: linear-gradient(175deg, var(--side-1), var(--side-2));
+    color: white;
+    height: 100vh;
+    position: fixed;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    box-shadow: 10px 0 30px rgba(3, 7, 18, 0.2);
+    border-right: 1px solid rgba(148, 163, 184, 0.2);
+}
+.sidebar.expanded { width: 260px; }
+
+.sidebar-header {
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #d8e1ff;
+    padding: 14px 18px;
+    margin: 8px 10px;
+    border-radius: 12px;
+    transition: 0.22s ease;
+    white-space: nowrap;
+}
+.sidebar a:hover {
+    background: rgba(89, 134, 255, 0.2);
+    color: white;
+}
+
+.sidebar a.active {
+    background: linear-gradient(90deg, rgba(45,108,223,0.85), rgba(84,122,255,0.95));
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(45,108,223,0.25);
+}
+
+.sidebar svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+    margin-right: 15px;
+    min-width: 20px;
+}
+
+.sidebar span {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-weight: 500;
+}
+.sidebar.expanded span { opacity: 1; }
+
+.sidebar-profile {
+    margin: 12px 10px 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px rgba(31, 90, 204, 0.3);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.sidebar-profile-meta {
+    min-width: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.expanded .sidebar-profile-meta {
+    opacity: 1;
+}
+
+.sidebar-profile-meta .name {
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-profile-meta .role {
+    color: #b9c6ef;
+    font-size: 11px;
+}
+
+/* ===== MAIN ===== */
+.main {
+    margin-left: 78px;
+    padding: 26px 28px 40px 28px;
+    flex: 1;
+    transition: margin-left 0.3s ease;
+}
+.main.shifted { margin-left: 260px; }
+
+.top-bar {
+    position: relative;
+    top: auto;
+    z-index: 20;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.top-brand h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 0.2px;
+}
+
+.top-brand p {
+    margin: 2px 0 0 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.top-brand .live-date {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #eaf7ff;
+    color: #0f5e84;
+    border: 1px solid #c8e7f6;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eef4ff;
+    color: #1747a6;
+    border: 1px solid #cfe0ff;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.profile-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid #d4deee;
+    border-radius: 999px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.profile-chip .avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+}
+
+.profile-chip .meta {
+    line-height: 1.1;
+}
+
+.profile-chip .meta .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.profile-chip .meta .role {
+    font-size: 10px;
+    color: #64748b;
+}
+
+.admin-section {
+    display: none;
+}
+
+.admin-section.active {
+    display: block;
+}
+
+/* ===== CARD ===== */
+.card {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    margin-bottom: 24px;
+}
+
+/* ===== TABLE ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f5f7fc;
+    padding: 12px;
+    font-size: 14px;
+    text-align: left;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+#timetable-section table {
+    table-layout: fixed;
+}
+
+#timetable-section td,
+#timetable-section th {
+    vertical-align: middle;
+}
+
+#timetable-section td:last-child {
+    width: 265px;
+}
+
+#timetable-section th:nth-child(1),
+#timetable-section td:nth-child(1),
+#timetable-section th:nth-child(2),
+#timetable-section td:nth-child(2),
+#timetable-section th:nth-child(5),
+#timetable-section td:nth-child(5),
+#timetable-section th:nth-child(6),
+#timetable-section td:nth-child(6),
+#timetable-section th:nth-child(7),
+#timetable-section td:nth-child(7) {
+    width: 68px;
+}
+
+#timetable-section th:nth-child(4),
+#timetable-section td:nth-child(4) {
+    width: 165px;
+}
+
+#timetable-section th:nth-child(3),
+#timetable-section td:nth-child(3) {
+    width: 350px;
+    word-break: break-word;
+}
+
+.tt-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tt-actions .action-btn {
+    margin-right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    line-height: 1;
+}
+
+.tt-inline-input,
+.tt-inline-select {
+    width: 100%;
+    min-height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font: inherit;
+    background: #f8fbff;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.tt-inline-input:focus,
+.tt-inline-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+@media (max-width: 1200px) {
+    #timetable-section td:last-child {
+        width: 230px;
+    }
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    margin-right: 6px;
+}
+
+.approve {
+    background: #16a34a;
+    color: white;
+}
+.approve:hover {
+    background: #15803d;
+}
+
+.reject {
+    background: #dc2626;
+    color: white;
+}
+.reject:hover {
+    background: #b91c1c;
+}
+
+.empty {
+    color: #64748b;
+    padding: 20px 0;
+}
+
+.events-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    gap: 14px;
+}
+
+.events-main-card {
+    border: 1px solid #d7e3f5;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+    padding: 14px;
+}
+
+.events-main-head {
+    margin-bottom: 10px;
+}
+
+.events-main-head h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #132747;
+}
+
+.events-main-head p {
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    color: #5a6a87;
+}
+
+.event-form-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.event-form-grid input,
+.event-form-grid select {
+    min-height: 38px;
+    border: 1px solid #cad8ef;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font: inherit;
+    background: #fff;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.event-form-grid input:focus,
+.event-form-grid select:focus {
+    outline: none;
+    border-color: #1497d2;
+    box-shadow: 0 0 0 3px rgba(20, 151, 210, 0.16);
+}
+
+.event-add-btn {
+    border: 1px solid #bedef1;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #16a8df, #1497d2);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.event-add-btn:hover {
+    filter: brightness(1.04);
+}
+
+.events-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-calendar-surface {
+    border: 1px solid #d6e0ef;
+    border-radius: 16px;
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+#adminCalendarUI .fc {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+#adminCalendarUI .fc-toolbar-title {
+    font-size: clamp(20px, 3vw, 30px);
+    color: #15223a;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+}
+
+#adminCalendarUI .fc-toolbar.fc-header-toolbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+#adminCalendarUI .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#adminCalendarUI .fc-toolbar-chunk:nth-child(2) {
+    justify-content: center;
+    min-width: 0;
+}
+
+#adminCalendarUI .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+}
+
+#adminCalendarUI .fc-button {
+    border: 1px solid #bedef1 !important;
+    background: linear-gradient(90deg, #16a8df, #1497d2) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+    box-shadow: none !important;
+}
+
+#adminCalendarUI .fc-button-group {
+    display: inline-flex !important;
+    gap: 8px;
+}
+
+#adminCalendarUI .fc-button-group > .fc-button {
+    margin: 0 !important;
+    margin-left: 8px !important;
+    border-radius: 10px !important;
+}
+
+#adminCalendarUI .fc-button-group > .fc-button:first-child {
+    margin-left: 0 !important;
+}
+
+#adminCalendarUI .fc-button:hover {
+    filter: brightness(1.04);
+}
+
+@media (max-width: 980px) {
+    #adminCalendarUI .fc-toolbar.fc-header-toolbar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    #adminCalendarUI .fc-toolbar-chunk {
+        justify-content: center !important;
+        flex-wrap: wrap;
+    }
+}
+
+#adminCalendarUI .fc-col-header {
+    border: none !important;
+}
+
+#adminCalendarUI .fc-col-header-cell {
+    border: none !important;
+    background: linear-gradient(90deg, #16ace0, #1496d1);
+}
+
+#adminCalendarUI .fc-col-header-cell:first-child {
+    border-radius: 999px 0 0 999px;
+}
+
+#adminCalendarUI .fc-col-header-cell:last-child {
+    border-radius: 0 999px 999px 0;
+}
+
+#adminCalendarUI .fc-col-header-cell-cushion {
+    color: #f8fdff;
+    font-weight: 700;
+    padding: 9px 0;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+#adminCalendarUI .fc-daygrid-day-frame {
+    min-height: 76px;
+}
+
+#adminCalendarUI .fc-daygrid-day-number {
+    color: #2b2f37;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+#adminCalendarUI .fc .fc-daygrid-day.fc-day-today {
+    background: #e8f6ff !important;
+}
+
+#adminCalendarUI .fc-event {
+    border: none !important;
+    border-left: 3px solid #0877ab !important;
+    border-radius: 6px !important;
+    background: #e8f7ff !important;
+    color: #0d5f87 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+}
+
+#adminCalendarUI .fc-event-title,
+#adminCalendarUI .fc-event-main-frame {
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+#adminCalendarUI .fc-event.is-important {
+    border-left-color: #d97706 !important;
+    background: #fff1dd !important;
+    color: #9a3412 !important;
+}
+
+#adminCalendarUI .fc-event.is-government-holiday {
+    border-left-color: #0f766e !important;
+    background: #dcfdf7 !important;
+    color: #0f766e !important;
+}
+
+#adminCalendarUI .fc-theme-standard td,
+#adminCalendarUI .fc-theme-standard th {
+    border-color: #e3e9f3 !important;
+}
+
+.admin-calendar-note {
+    font-size: 12px;
+    color: #46687f;
+    margin: -2px 0 12px 0;
+}
+
+.events-upcoming {
+    border: 1px dashed #9ecadd;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f9fdff, #f3fbff);
+    padding: 14px;
+    height: fit-content;
+}
+
+.events-upcoming h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #0f5e84;
+}
+
+.events-upcoming p {
+    margin: 5px 0 10px 0;
+    font-size: 12px;
+    color: #4c6a7f;
+}
+
+.events-upcoming-list {
+    display: grid;
+    gap: 8px;
+    max-height: 380px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.events-upcoming-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid #d5e8f3;
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+}
+
+.events-upcoming-date {
+    min-width: 95px;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e8f7ff;
+    color: #0d5f87;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.events-upcoming-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1d334d;
+}
+
+.teacher-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.teacher-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    background: #f8fafc;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-right: 6px;
+}
+
+.badge.ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge.warn {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.notice {
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+.notice.ok {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+.notice.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.profile-panel {
+    display: none;
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    width: 290px;
+    z-index: 220;
+    background: #fff;
+    border: 1px solid #dfe5f1;
+    border-radius: 12px;
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.16);
+    padding: 14px;
+}
+
+.profile-panel.show {
+    display: block;
+}
+
+.profile-panel h4 {
+    margin: 0 0 10px 0;
+}
+
+.profile-row {
+    font-size: 13px;
+    color: #334155;
+    margin: 6px 0;
+}
+
+.profile-panel label {
+    display: block;
+    font-size: 12px;
+    color: #475569;
+    margin-top: 8px;
+}
+
+.profile-panel input {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 9px;
+    border-radius: 8px;
+    border: 1px solid #d2daeb;
+}
+
+.profile-panel button {
+    margin-top: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: #2d6cdf;
+    color: #fff;
+    padding: 9px 10px;
+    cursor: pointer;
+}
+
+.profile-erp {
+    padding: 0;
+    overflow: hidden;
+}
+
+.profile-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255,255,255,0.65), rgba(255,255,255,0)),
+        linear-gradient(90deg, #edf3ff, #e2ecff);
+    border-bottom: 1px solid #d7e3fb;
+}
+
+.profile-hero h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.profile-hero p {
+    margin: 4px 0 0 0;
+    color: #4b5f8f;
+    font-size: 13px;
+}
+
+.profile-main {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 18px;
+    padding: 18px;
+}
+
+.profile-side {
+    border: 1px solid #e0e8f6;
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 14px;
+}
+
+.profile-avatar-lg {
+    width: 94px;
+    height: 94px;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    background: linear-gradient(135deg, #5c9dff, #2d6cdf);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 34px;
+    box-shadow: 0 12px 24px rgba(45, 108, 223, 0.25);
+    overflow: hidden;
+}
+
+.profile-avatar-lg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-side .meta-line {
+    font-size: 13px;
+    color: #334155;
+    margin: 7px 0;
+}
+
+.profile-form {
+    border: 1px solid #e0e8f6;
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.profile-form-grid .full {
+    grid-column: 1 / -1;
+}
+
+.profile-form label {
+    display: block;
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 5px;
+}
+
+.profile-form input,
+.profile-form select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #d0dbef;
+    font-family: 'Space Grotesk', sans-serif;
+    box-sizing: border-box;
+}
+
+.profile-form input:focus,
+.profile-form select:focus {
+    outline: none;
+    border-color: #2d6cdf;
+    box-shadow: 0 0 0 3px rgba(45,108,223,0.15);
+}
+
+.profile-form .submit-btn {
+    margin-top: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    background: linear-gradient(90deg, #2d6cdf, #4d83f6);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 860px) {
+    .profile-main {
+        grid-template-columns: 1fr;
+    }
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .events-layout {
+        grid-template-columns: 1fr;
+    }
+    .event-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gen-shell {
+    border: 1px solid #dce5f7;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    overflow: hidden;
+}
+
+.gen-hero {
+    padding: 18px 20px;
+    border-bottom: 1px solid #dbe6fa;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255,255,255,0.65), rgba(255,255,255,0)),
+        linear-gradient(90deg, #edf3ff, #e3ecff);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.gen-hero h2 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.gen-hero p {
+    margin: 4px 0 0 0;
+    color: #516490;
+    font-size: 13px;
+}
+
+.gen-body {
+    padding: 16px;
+}
+
+.gen-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.gen-flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.gen-flow-step {
+    border: 1px solid #d8e4fa;
+    border-radius: 12px;
+    background: #fff;
+    padding: 10px 12px;
+}
+
+.gen-flow-step .n {
+    font-size: 11px;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.gen-flow-step .t {
+    margin-top: 3px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #132a57;
+}
+
+.gen-flow-step .d {
+    margin-top: 2px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.gen-metric {
+    border: 1px solid #d8e4fa;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+}
+
+.gen-metric .k {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.gen-metric .v {
+    margin-top: 4px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #132a57;
+}
+
+.gen-form {
+    border: 1px solid #d8e4fa;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+}
+
+.gen-form-row {
+    display: grid;
+    grid-template-columns: 1fr 120px auto;
+    gap: 10px;
+}
+
+.gen-form-row select,
+.gen-form-row input {
+    padding: 10px;
+    border-radius: 9px;
+    border: 1px solid #cfd8eb;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.gen-form-row button {
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(90deg, #1f63db, #3f7af0);
+    color: #fff;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.gen-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.gen-table-wrap {
+    margin-top: 16px;
+    border: 1px solid #d8e4fa;
+    border-radius: 12px;
+    overflow: auto;
+    background: #fff;
+}
+
+.gen-table-wrap h3 {
+    margin: 0;
+    padding: 12px;
+    border-bottom: 1px solid #e4ebfa;
+    font-size: 16px;
+}
+
+.gen-table-wrap td input,
+.gen-table-wrap td select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #cfd8eb;
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.soft-btn {
+    display: inline-block;
+    border: 1px solid #cfdaef;
+    border-radius: 8px;
+    background: #f8fbff;
+    color: #1e293b;
+    text-decoration: none;
+    padding: 5px 9px;
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.gen-action {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 6px;
+}
+
+.gen-action.del {
+    background: #dc2626;
+    color: #fff;
+}
+
+.gen-action.edit {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.edit-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(15, 23, 42, 0.45);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.edit-modal-overlay.show {
+    display: flex;
+}
+
+.edit-modal {
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border: 1px solid #d7e3fb;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 42px rgba(15, 23, 42, 0.24);
+}
+
+.edit-modal-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e4ebfa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #edf3ff, #e3ecff);
+}
+
+.edit-modal-head h4 {
+    margin: 0;
+}
+
+.edit-modal-close {
+    border: none;
+    background: #fff;
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.edit-modal-body {
+    padding: 14px 16px 16px 16px;
+}
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.edit-grid .full {
+    grid-column: 1 / -1;
+}
+
+.edit-grid label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.edit-grid input,
+.edit-grid select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #cfd8eb;
+    border-radius: 9px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.edit-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.edit-actions .cancel {
+    border: 1px solid #d4deee;
+    background: #fff;
+    color: #334155;
+}
+
+@media (max-width: 720px) {
+    .edit-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .gen-form-row {
+        grid-template-columns: 1fr;
+    }
+    .gen-flow {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+
+    <div class="sidebar-header" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+    </div>
+
+    <div class="sidebar-profile" onclick="openProfileSection(event)">
+        <div class="avatar">
+            {% if admin_profile_pic %}
+            <img src="{{ url_for('static', filename=admin_profile_pic) }}" alt="Profile">
+            {% else %}
+            {{ admin_name[:1] | upper }}
+            {% endif %}
+        </div>
+        <div class="sidebar-profile-meta">
+            <div class="name">{{ admin_name }}</div>
+            <div class="role">Administrator</div>
+        </div>
+    </div>
+
+    <a href="#" class="nav-link active" data-section="dashboard-section" onclick="showSection('dashboard-section', this); return false;">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="users-section" onclick="showSection('users-section', this); return false;">
+        <i data-lucide="users"></i>
+        <span>User Approvals</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="preferences-section" onclick="showSection('preferences-section', this); return false;">
+        <i data-lucide="clipboard-check"></i>
+        <span>Preferences</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="events-section" onclick="showSection('events-section', this); return false;">
+        <i data-lucide="calendar-days"></i>
+        <span>Event Management</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="timetable-section" onclick="showSection('timetable-section', this); return false;">
+        <i data-lucide="table-2"></i>
+        <span>Timetable</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="generate-section" onclick="showSection('generate-section', this); return false;">
+        <i data-lucide="calendar-plus"></i>
+        <span>Generate Timetable</span>
+    </a>
+
+    <a href="#" class="nav-link" data-section="history-section" onclick="showSection('history-section', this); return false;">
+        <i data-lucide="history"></i>
+        <span>Semester History</span>
+    </a>
+
+    <a href="/logout">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+    </a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+    <div class="top-bar">
+        <div class="top-brand">
+            <h1 id="liveAdminWelcome">Admin Dashboard</h1>
+            <p id="liveAdminLine">
+                SmartTimetable Control Center
+                <span id="liveAdminDate" class="live-date"></span>
+            </p>
+        </div>
+        <div class="top-right">
+            <div class="top-pill" id="liveAdminPortal">
+                <i data-lucide="shield-check"></i>
+                System Administration
+            </div>
+            <div class="profile-chip" onclick="openProfileSection(event)">
+                <div class="avatar">
+                    {% if admin_profile_pic %}
+                    <img src="{{ url_for('static', filename=admin_profile_pic) }}" alt="Profile">
+                    {% else %}
+                    {{ admin_name[:1] | upper }}
+                    {% endif %}
+                </div>
+                <div class="meta">
+                    <div class="name">{{ admin_name }}</div>
+                    <div class="role">Admin</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-section" class="admin-section">
+        <div class="card profile-erp">
+            <div class="profile-hero">
+                <div>
+                    <h3>Admin Profile</h3>
+                    <p>Manage administrator identity and account settings</p>
+                </div>
+                <div class="top-pill">
+                    <i data-lucide="shield"></i>
+                    ERP Admin Identity
+                </div>
+            </div>
+
+            <div class="profile-main">
+                <div class="profile-side">
+                    <div class="profile-avatar-lg">
+                        {% if admin_profile_pic %}
+                        <img src="{{ url_for('static', filename=admin_profile_pic) }}" alt="Profile">
+                        {% else %}
+                        {{ admin_name[:1] | upper }}
+                        {% endif %}
+                    </div>
+                    <div class="meta-line"><b>Name:</b> {{ admin_name }}</div>
+                    <div class="meta-line"><b>Email:</b> {{ admin_email }}</div>
+                    <div class="meta-line"><b>Role:</b> Administrator</div>
+                </div>
+
+                <form class="profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
+                    <div class="profile-form-grid">
+                        <div class="full">
+                            <label>Name</label>
+                            <input type="text" name="name" value="{{ admin_name }}" required>
+                        </div>
+
+                        <div class="full">
+                            <label>Profile Picture</label>
+                            <input type="file" name="profile_pic" accept="image/*">
+                        </div>
+                    </div>
+                    <button class="submit-btn" type="submit">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% set generate_msg = message if message and "Timetable generated" in message else "" %}
+    {% set generate_err = error if error and ("Timetable" in error or "feasible" in error or "ERROR:" in error) else "" %}
+    {% set general_msg = "" if generate_msg else message %}
+    {% set general_err = "" if generate_err else error %}
+
+    <div id="events-section" class="admin-section">
+    <div class="card">
+        <h2>Calendar Event Management</h2>
+        <div class="events-layout">
+            <div class="events-main-card">
+                <div class="events-main-head">
+                    <h3>Publish And Maintain Events</h3>
+                    <p>Keep exam, test, and holiday notices professional and easy to scan.</p>
+                </div>
+                <form action="/admin/events/add" method="POST" class="event-form-grid">
+                    <input type="text" name="title" placeholder="Event title (Exam, Test, Holiday, Leave)" required>
+                    <input type="date" name="date" required>
+                    <select name="event_type">
+                        <option value="general">General</option>
+                        <option value="test">Test</option>
+                        <option value="exam">Exam</option>
+                        <option value="vacation">Holiday / Leave</option>
+                    </select>
+                    <select name="important">
+                        <option value="no">Normal</option>
+                        <option value="yes">Important</option>
+                    </select>
+                    <button type="submit" class="event-add-btn">Add Event</button>
+                </form>
+                <div id="adminCalendarUI" class="admin-calendar-surface"></div>
+                <div id="adminCalendarNote" class="admin-calendar-note">Tip: click any date to prefill the add-event date field.</div>
+
+                {% if admin_events %}
+                <div class="events-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Creator</th>
+                                <th>Important</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in admin_events %}
+                            <tr
+                                data-event-id="{{ e.id }}"
+                                data-event-date="{{ e.date }}"
+                                data-event-title="{{ e.title }}"
+                                data-event-type="{{ e.type }}"
+                                data-event-important="{{ 'yes' if e.important else 'no' }}"
+                                data-event-creator="{{ e.creator_name }}"
+                            >
+                                <td class="event-col-date">{{ e.date }}</td>
+                                <td class="event-col-title">{{ e.title }}</td>
+                                <td class="event-col-type">
+                                    {% if e.type == "vacation" %}
+                                        Holiday / Leave
+                                    {% elif e.type == "government_holiday" %}
+                                        Government Holiday
+                                    {% else %}
+                                        {{ e.type|capitalize }}
+                                    {% endif %}
+                                </td>
+                                <td class="event-col-creator">{{ e.creator_name }}</td>
+                                <td class="event-col-important">{{ "Yes" if e.important else "No" }}</td>
+                                <td class="event-col-action">
+                                    <button type="button" class="action-btn" style="border:none;background:#0ea5e9;color:#fff;cursor:pointer;" onclick="startInlineEventEdit(this)">Edit</button>
+                                    <a class="action-btn reject" href="/admin/events/delete?id={{ e.id }}">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="empty">No calendar events yet.</div>
+                {% endif %}
+            </div>
+
+            <div class="events-upcoming">
+                <h3>Upcoming Holidays</h3>
+                <p>Visible here without scrolling the full page.</p>
+                {% if vacations %}
+                <div class="events-upcoming-list">
+                    {% for v in vacations %}
+                    <div class="events-upcoming-item">
+                        <span class="events-upcoming-date">{{ v.date }}</span>
+                        <span class="events-upcoming-title">{{ v.title }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="vacation-empty">No upcoming holiday announcements.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="dashboard-section" class="admin-section active">
+    {% if general_err %}
+    <div class="notice error">{{ general_err }}</div>
+    {% endif %}
+    {% if general_msg %}
+    <div class="notice ok">{{ general_msg }}</div>
+    {% endif %}
+    <div class="card">
+        <h2>Dashboard Overview</h2>
+        <div class="teacher-grid">
+            <div class="teacher-card">
+                <div style="font-size:13px; color:#64748b;">Pending Signups</div>
+                <div style="font-size:28px; font-weight:700;">{{ pending | length }}</div>
+            </div>
+            <div class="teacher-card">
+                <div style="font-size:13px; color:#64748b;">Pending Preferences</div>
+                <div style="font-size:28px; font-weight:700;">{{ preference_requests | length }}</div>
+            </div>
+            <div class="teacher-card">
+                <div style="font-size:13px; color:#64748b;">Timetable Rows</div>
+                <div style="font-size:28px; font-weight:700;">{{ timetable_rows | length }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>Teacher Cards (Signup + Preferences)</h2>
+        {% if teacher_cards %}
+        <div class="teacher-grid">
+            {% for t in teacher_cards %}
+            <div class="teacher-card">
+                <h3 style="margin:0 0 8px 0;">{{ t.name }}</h3>
+                <div style="font-size:13px; color:#475569; margin-bottom:10px;">
+                    {{ t.email }} | Dept: {{ t.department }}
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <span class="badge ok">Classes: {{ t.timetable_count }}</span>
+                    {% if t.is_all_absent %}
+                    <span class="badge warn">All Marked Absent</span>
+                    {% endif %}
+                </div>
+
+                <div style="font-size:13px; margin-bottom:10px;">
+                    <b>Preferences/Courses:</b>
+                    {% if t.courses %}
+                    <ul style="margin:6px 0 0 18px; padding:0;">
+                        {% for c in t.courses %}
+                        <li>{{ c.subject }} ({{ c.target }}) - {{ c.prefs | join(", ") }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div style="color:#64748b;">No approved preferences yet.</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% if t.is_all_absent %}
+                    <a class="action-btn" style="background:#475569;color:#fff;"
+                       href="{{ url_for('mark_teacher_all_absent', teacher=t.name, clear='1') }}">
+                       Clear Absent
+                    </a>
+                    {% else %}
+                    <a class="action-btn" style="background:#f59e0b;color:#fff;"
+                       href="{{ url_for('mark_teacher_all_absent', teacher=t.name) }}">
+                       Mark Teacher Absent
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="empty">No teachers found.</div>
+        {% endif %}
+    </div>
+    </div>
+
+    <div id="users-section" class="admin-section">
+    <div class="card">
+        <h2>Pending Signup Approvals</h2>
+
+        {% if pending %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in pending %}
+                <tr>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.name }}</td>
+                    <td>{{ u.department }}</td>
+                    <td style="text-transform:capitalize;">{{ u.role }}</td>
+                    <td>
+                        <a class="action-btn approve"
+                           href="/admin/approve?email={{ u.email }}">
+                           Approve
+                        </a>
+
+                        <a class="action-btn reject"
+                           href="/admin/reject?email={{ u.email }}&role={{ u.role }}">
+                           Reject
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty">
+                No pending signup requests.
+            </div>
+        {% endif %}
+
+    </div>
+
+    <div class="card">
+        <h2>Approval / Rejection History</h2>
+
+        {% if history %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Action</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in history %}
+                <tr>
+                    <td>{{ h.timestamp }}</td>
+                    <td style="text-transform:capitalize;">{{ h.action }}</td>
+                    <td>{{ h.email }}</td>
+                    <td>{{ h.name }}</td>
+                    <td>{{ h.department }}</td>
+                    <td style="text-transform:capitalize;">{{ h.role }}</td>
+                    <td>{{ h.admin }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty">
+                No approval or rejection history yet.
+            </div>
+        {% endif %}
+
+    </div>
+    </div>
+
+    <div id="preferences-section" class="admin-section">
+    <div class="card">
+        <h2>Pending Preference Requests</h2>
+
+        {% if preference_requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Students</th>
+                    <th>Target</th>
+                    <th>Preferences</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in preference_requests %}
+                <tr>
+                    <td>{{ r.subject }}</td>
+                    <td>{{ r.teacher }}</td>
+                    <td>{{ r.students }}</td>
+                    <td>{{ r.target }}</td>
+                    <td>{{ r.prefs | join(", ") }}</td>
+                    <td>
+                        <a class="action-btn approve" href="/admin/preferences/approve?id={{ r.id }}">Approve</a>
+                        <a class="action-btn reject" href="/admin/preferences/reject?id={{ r.id }}">Reject</a>
+                        <a class="action-btn" style="background:#0ea5e9;color:#fff;" href="/admin/preferences/edit?id={{ r.id }}">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty">
+                No pending preference requests.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Preference Decision History</h2>
+
+        {% if preference_history %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Action</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Target</th>
+                    <th>Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in preference_history %}
+                <tr>
+                    <td>{{ h.timestamp }}</td>
+                    <td style="text-transform:capitalize;">{{ h.action }}</td>
+                    <td>{{ h.subject }}</td>
+                    <td>{{ h.teacher }}</td>
+                    <td>{{ h.target }}</td>
+                    <td>{{ h.admin }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty">
+                No preference decision history yet.
+            </div>
+        {% endif %}
+    </div>
+    </div>
+
+    <div id="timetable-section" class="admin-section">
+    <div class="card">
+        <h2>Generated Timetable (Admin Edit)</h2>
+        <div style="max-width:520px; margin:10px 0 14px;">
+            <label style="font-size:13px; color:#475569;">Filter by Day</label>
+            <div style="display:flex; gap:8px; margin-top:6px;">
+                <select id="adminDayFilter" style="flex:1; padding:9px 10px; border-radius:8px; border:1px solid #cfd8eb;">
+                    <option value="ALL">All Days</option>
+                    <option value="Mon">Monday</option>
+                    <option value="Tue">Tuesday</option>
+                    <option value="Wed">Wednesday</option>
+                    <option value="Thu">Thursday</option>
+                    <option value="Fri">Friday</option>
+                </select>
+                <button id="adminDayFilterReset" type="button" style="border:none; border-radius:8px; background:#dde6f7; color:#1e293b; padding:9px 12px; cursor:pointer;">Reset</button>
+                <span id="adminDayFilterCount" style="align-self:center; font-size:12px; color:#334155; background:#e9f1ff; border-radius:999px; padding:6px 10px;">Showing 0 rows</span>
+            </div>
+        </div>
+
+        {% if timetable_rows %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Slot</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Room</th>
+                    <th>Target</th>
+                    <th>Label</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminTimetableBodyMain">
+                {% for row in timetable_rows %}
+                <tr
+                    data-day="{{ row.day }}"
+                    data-slot="{{ row.slot }}"
+                    data-subject="{{ row.subject }}"
+                    data-teacher="{{ row.teacher }}"
+                    data-room="{{ row.room }}"
+                    data-target="{{ row.target }}"
+                    data-label="{{ row.label if row.label else '' }}"
+                >
+                    <td>{{ row.day }}</td>
+                    <td>{{ row.slot }}</td>
+                    <td>{{ row.subject }}</td>
+                    <td>{{ row.teacher }}</td>
+                    <td>{{ row.room }}</td>
+                    <td>{{ row.target }}</td>
+                    <td>{{ row.label if row.label else "-" }}</td>
+                    <td>
+                        <div class="tt-actions">
+                            <a class="action-btn reject"
+                               href="{{ url_for('delete_timetable_entry', day=row.day, slot=row.slot, subject=row.subject, room=row.room, teacher=row.teacher, target=row.target) }}">
+                               Delete
+                            </a>
+
+                            {% if row.label == "Teacher Absent" %}
+                            <a class="action-btn"
+                               style="background:#475569;color:#fff;"
+                               href="{{ url_for('label_timetable_absent', day=row.day, slot=row.slot, subject=row.subject, room=row.room, teacher=row.teacher, target=row.target, clear='1') }}">
+                               Clear Label
+                            </a>
+                            {% else %}
+                            <a class="action-btn"
+                               style="background:#f59e0b;color:#fff;"
+                               href="{{ url_for('label_timetable_absent', day=row.day, slot=row.slot, subject=row.subject, room=row.room, teacher=row.teacher, target=row.target) }}">
+                               Mark Absent
+                            </a>
+                            {% endif %}
+                            <button type="button"
+                               class="action-btn"
+                               style="border:none;background:#0ea5e9;color:#fff;cursor:pointer;"
+                               onclick="startAdminInlineEdit(this)">
+                               Edit
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="empty">No generated timetable entries found.</div>
+        {% endif %}
+    </div>
+    </div>
+
+    <div id="generate-section" class="admin-section">
+    {% if generate_err %}
+    <div class="notice error">{{ generate_err }}</div>
+    {% endif %}
+    {% if generate_msg %}
+    <div class="notice ok">{{ generate_msg }}</div>
+    {% endif %}
+    <div class="gen-shell">
+        <div class="gen-hero">
+            <div>
+                <h2>Generate Timetable</h2>
+                <p>Review, edit, and finalize semester timetable before publishing.</p>
+            </div>
+            <div class="top-pill">
+                <i data-lucide="wand-sparkles"></i>
+                ERP Timetable Engine
+            </div>
+        </div>
+
+        <div class="gen-body">
+            <div class="gen-flow">
+                <div class="gen-flow-step">
+                    <div class="n">STEP 1</div>
+                    <div class="t">Approved Course Queue</div>
+                    <div class="d">All currently approved teacher preferences stack here.</div>
+                </div>
+                <div class="gen-flow-step">
+                    <div class="n">STEP 2</div>
+                    <div class="t">Generate Timetable</div>
+                    <div class="d">Click Generate to build the semester timetable from queue.</div>
+                </div>
+                <div class="gen-flow-step">
+                    <div class="n">STEP 3</div>
+                    <div class="t">Publish Everywhere</div>
+                    <div class="d">Updated timetable appears in Admin, Teacher, and Student views.</div>
+                </div>
+            </div>
+
+            <div class="gen-metric-grid">
+                <div class="gen-metric">
+                    <div class="k">Approved Courses</div>
+                    <div class="v">{{ approved_courses_count }}</div>
+                </div>
+                <div class="gen-metric">
+                    <div class="k">Pending Preferences</div>
+                    <div class="v">{{ preference_requests | length }}</div>
+                </div>
+                <div class="gen-metric">
+                    <div class="k">Current Timetable Rows</div>
+                    <div class="v">{{ timetable_rows | length }}</div>
+                </div>
+            </div>
+
+            <form action="/generate" method="POST" class="gen-form">
+                <div class="gen-form-row">
+                    <select name="semester_key">
+                        {% for key, label in semester_options %}
+                        <option value="{{ key }}" {% if key == default_semester_key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="semester_year" min="2000" max="2100" value="{{ default_semester_year }}">
+                    <button type="submit">Generate Now</button>
+                </div>
+                <div class="gen-hint">Semester flow: Jan-Apr, Aug-Nov, Dec Vacation, Jan-May.</div>
+            </form>
+
+            <div class="gen-table-wrap">
+                <h3>Generation Stack (Approved Preferences)</h3>
+                {% if approved_course_stack %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Teacher</th>
+                            <th>Subject</th>
+                            <th>Target</th>
+                            <th>Students</th>
+                            <th>Preferred Slots</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in approved_course_stack %}
+                        <tr>
+                            <td>{{ c.teacher }}</td>
+                            <td>{{ c.subject }}</td>
+                            <td>{{ c.target }}</td>
+                            <td>{{ c.students }}</td>
+                            <td>{{ c.prefs | join(", ") }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty" style="padding:14px;">No approved preferences stacked yet.</div>
+                {% endif %}
+            </div>
+
+            <div class="gen-table-wrap">
+                <h3>Current Semester Timetable Snapshot</h3>
+                {% if timetable_rows %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Slot</th>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th>Room</th>
+                            <th>Target</th>
+                            <th>Label</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTimetableBodySnapshot">
+                        {% for row in timetable_rows %}
+                        <tr
+                            data-day="{{ row.day }}"
+                            data-slot="{{ row.slot }}"
+                            data-subject="{{ row.subject }}"
+                            data-teacher="{{ row.teacher }}"
+                            data-room="{{ row.room }}"
+                            data-target="{{ row.target }}"
+                            data-label="{{ row.label if row.label else '' }}"
+                        >
+                            <td>{{ row.day }}</td>
+                            <td>{{ row.slot }}</td>
+                            <td>{{ row.subject }}</td>
+                            <td>{{ row.teacher }}</td>
+                            <td>{{ row.room }}</td>
+                            <td>{{ row.target }}</td>
+                            <td>{{ row.label if row.label else "-" }}</td>
+                            <td>
+                                <button type="button" class="gen-action del" onclick="deleteSnapshotRow(this)">
+                                   Delete
+                                </button>
+                                <button type="button" class="gen-action edit" onclick="startInlineEdit(this)">
+                                   Edit
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty" style="padding:14px;">No timetable rows available yet. Generate after approvals.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="edit-modal-overlay" id="snapshotEditModal">
+        <div class="edit-modal">
+            <div class="edit-modal-head">
+                <h4>Edit Timetable Row</h4>
+                <button type="button" class="edit-modal-close" onclick="closeSnapshotEdit()">x</button>
+            </div>
+            <div class="edit-modal-body">
+                <form id="snapshotEditForm">
+                    <input type="hidden" name="old_day" id="edit_old_day">
+                    <input type="hidden" name="old_slot" id="edit_old_slot">
+                    <input type="hidden" name="old_subject" id="edit_old_subject">
+                    <input type="hidden" name="old_teacher" id="edit_old_teacher">
+                    <input type="hidden" name="old_room" id="edit_old_room">
+                    <input type="hidden" name="old_target" id="edit_old_target">
+
+                    <div class="edit-grid">
+                        <div>
+                            <label>Day</label>
+                            <select name="day" id="edit_day">
+                                <option>Mon</option><option>Tue</option><option>Wed</option><option>Thu</option><option>Fri</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Slot</label>
+                            <select name="slot" id="edit_slot">
+                                <option>S1</option><option>S2</option><option>S3</option><option>S4</option>
+                            </select>
+                        </div>
+                        <div class="full">
+                            <label>Subject</label>
+                            <input name="subject" id="edit_subject" required>
+                        </div>
+                        <div>
+                            <label>Teacher</label>
+                            <input name="teacher" id="edit_teacher" required>
+                        </div>
+                        <div>
+                            <label>Room</label>
+                            <input name="room" id="edit_room" required>
+                        </div>
+                        <div>
+                            <label>Target</label>
+                            <select name="target" id="edit_target">
+                                <option>ALL</option><option>CSE</option><option>ECE</option><option>IT</option><option>ME</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Label</label>
+                            <input name="label" id="edit_label">
+                        </div>
+                    </div>
+                    <div class="edit-actions">
+                        <button type="button" class="gen-action edit cancel" onclick="closeSnapshotEdit()">Cancel</button>
+                        <button type="submit" class="gen-action" style="background:#2563eb;color:#fff;">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="history-section" class="admin-section">
+    <div class="card">
+        <h2>Semester-wise Timetable History</h2>
+        {% if timetable_history_grouped %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Semester</th>
+                    <th>Latest Generated At</th>
+                    <th>Latest Rows</th>
+                    <th>Latest Subjects</th>
+                    <th>Generated By</th>
+                    <th>All Runs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in timetable_history_grouped %}
+                <tr>
+                    <td>{{ g.semester }}</td>
+                    <td>{{ g.latest_generated_at }}</td>
+                    <td>{{ g.latest_rows }}</td>
+                    <td>{{ g.latest_subjects | join(", ") }}</td>
+                    <td>{{ g.generated_by }}</td>
+                    <td>
+                        <details>
+                            <summary style="cursor:pointer;">{{ g.total_runs }} run(s)</summary>
+                            <div style="margin-top:8px; display:grid; gap:6px;">
+                                {% for r in g.runs %}
+                                <div style="border:1px solid #dbe4f2; border-radius:8px; padding:8px; background:#f8fbff; font-size:12px;">
+                                    <div><b>{{ r.generated_at }}</b></div>
+                                    <div>Rows: {{ r.total_rows }}</div>
+                                    <div>Subjects: {{ r.subjects | join(", ") }}</div>
+                                    <div>By: {{ r.generated_by }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">No semester-wise timetable generation history yet.</div>
+        {% endif %}
+    </div>
+    </div>
+
+    <!-- Hidden form for timetable generation -->
+    <form id="generateForm" action="/generate" method="POST"></form>
+
+</div>
+</div>
+
+<script>
+let adminCalendar = null;
+let adminCalendarInitialized = false;
+const adminDisplayName = "{{ admin_name }}";
+
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("expanded");
+    document.getElementById("main").classList.toggle("shifted");
+}
+
+function showSection(id, el = null) {
+    document.querySelectorAll(".admin-section").forEach(sec => sec.classList.remove("active"));
+    const target = document.getElementById(id);
+    if (target) target.classList.add("active");
+
+    document.querySelectorAll(".nav-link").forEach(link => link.classList.remove("active"));
+    if (el) {
+        el.classList.add("active");
+    } else {
+        const matched = document.querySelector(`.nav-link[data-section="${id}"]`);
+        if (matched) matched.classList.add("active");
+    }
+
+    if (id === "events-section") {
+        initAdminCalendar();
+    }
+}
+
+function openProfileSection(e) {
+    if (e) e.preventDefault();
+    showSection("profile-section");
+    const section = document.getElementById("profile-section");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function formatEventTypeLabel(type) {
+    if (type === "vacation") return "Holiday / Leave";
+    if (type === "government_holiday") return "Government Holiday";
+    if (!type) return "General";
+    return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+function setAdminCalendarNote(message, tone = "info") {
+    const note = document.getElementById("adminCalendarNote");
+    if (!note) return;
+    note.textContent = message || "";
+    note.style.color = tone === "error" ? "#b42318" : "#46687f";
+}
+
+function updateLiveAdminHeader() {
+    const now = new Date();
+    const hr = now.getHours();
+    let part = "Evening";
+    if (hr < 12) part = "Morning";
+    else if (hr < 17) part = "Afternoon";
+
+    const title = document.getElementById("liveAdminWelcome");
+    const line = document.getElementById("liveAdminLine");
+    const portal = document.getElementById("liveAdminPortal");
+    if (title) title.textContent = `Good ${part}, ${adminDisplayName}`;
+    if (line) {
+        line.innerHTML = `SmartTimetable Control Center · ${part} Ops <span id="liveAdminDate" class="live-date"></span>`;
+    }
+    if (portal) {
+        portal.innerHTML = `<i data-lucide="shield-check"></i>System Administration · ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    const dateTag = document.getElementById("liveAdminDate");
+    if (dateTag) {
+        dateTag.textContent = now.toLocaleDateString([], {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    }
+    lucide.createIcons();
+}
+
+function applyReadableEventStyle(eventEl) {
+    if (!eventEl) return;
+    const bg = window.getComputedStyle(eventEl).backgroundColor || "";
+    const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return;
+    const r = parseInt(m[1], 10) / 255;
+    const g = parseInt(m[2], 10) / 255;
+    const b = parseInt(m[3], 10) / 255;
+    const luminance = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+    const textColor = luminance > 0.6 ? "#1f2937" : "#ffffff";
+    eventEl.style.setProperty("--fc-event-text-color", textColor);
+    eventEl.style.color = textColor;
+    eventEl.style.textShadow = "none";
+    eventEl.style.fontWeight = "700";
+    eventEl.querySelectorAll(".fc-event-title, .fc-event-time, .fc-event-main-frame, .fc-event-title-container").forEach((node) => {
+        node.style.color = textColor;
+        node.style.textShadow = "none";
+        node.style.fontWeight = "700";
+        node.style.opacity = "1";
+    });
+}
+
+function initAdminCalendar() {
+    if (adminCalendarInitialized) {
+        setTimeout(() => {
+            if (adminCalendar) adminCalendar.updateSize();
+        }, 120);
+        return;
+    }
+
+    const calendarEl = document.getElementById("adminCalendarUI");
+    if (!calendarEl || typeof FullCalendar === "undefined") return;
+
+    adminCalendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        height: "auto",
+        dayMaxEventRows: 3,
+        headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek"
+        },
+        buttonText: {
+            today: "Today",
+            month: "Month",
+            week: "Week"
+        },
+        events: "/events",
+        eventClassNames: function(info) {
+            const classes = [];
+            if (info.event.extendedProps && info.event.extendedProps.important) {
+                classes.push("is-important");
+            }
+            if (
+                info.event.extendedProps
+                && info.event.extendedProps.type === "government_holiday"
+            ) {
+                classes.push("is-government-holiday");
+            }
+            return classes;
+        },
+        eventDidMount: function(info) {
+            applyReadableEventStyle(info.el);
+        },
+        dateClick: function(info) {
+            const dateInput = document.querySelector('#events-section input[name="date"]');
+            if (dateInput) {
+                dateInput.value = info.dateStr;
+            }
+            setAdminCalendarNote(`Date selected: ${info.dateStr}. Add event form is prefilled.`);
+        },
+        eventClick: function(info) {
+            const ext = info.event.extendedProps || {};
+            const dateStr = (info.event.startStr || "").slice(0, 10);
+            const typeLabel = ext.type_label || formatEventTypeLabel(ext.type || "general");
+            setAdminCalendarNote(`Selected "${info.event.title}" on ${dateStr} (${typeLabel}).`);
+        }
+    });
+
+    adminCalendar.render();
+    adminCalendarInitialized = true;
+}
+
+function renderAdminEventRow(tr, eventData) {
+    tr.dataset.editing = "0";
+    tr.dataset.eventId = eventData.id;
+    tr.dataset.eventDate = eventData.date;
+    tr.dataset.eventTitle = eventData.title;
+    tr.dataset.eventType = eventData.type;
+    tr.dataset.eventImportant = eventData.important ? "yes" : "no";
+    tr.dataset.eventCreator = eventData.creator_name;
+
+    tr.querySelector(".event-col-date").textContent = eventData.date;
+    tr.querySelector(".event-col-title").textContent = eventData.title;
+    tr.querySelector(".event-col-type").textContent = formatEventTypeLabel(eventData.type);
+    tr.querySelector(".event-col-creator").textContent = eventData.creator_name;
+    tr.querySelector(".event-col-important").textContent = eventData.important ? "Yes" : "No";
+    tr.querySelector(".event-col-action").innerHTML = `
+        <button type="button" class="action-btn" style="border:none;background:#0ea5e9;color:#fff;cursor:pointer;" onclick="startInlineEventEdit(this)">Edit</button>
+        <a class="action-btn reject" href="/admin/events/delete?id=${encodeURIComponent(eventData.id)}">Delete</a>
+    `;
+}
+
+function startInlineEventEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || tr.dataset.editing === "1") return;
+
+    tr.dataset.editing = "1";
+    tr._eventOriginal = {
+        id: tr.dataset.eventId || "",
+        date: tr.dataset.eventDate || "",
+        title: tr.dataset.eventTitle || "",
+        type: tr.dataset.eventType || "general",
+        creator_name: tr.dataset.eventCreator || "",
+        important: (tr.dataset.eventImportant || "no") === "yes"
+    };
+
+    tr.querySelector(".event-col-date").innerHTML = `<input type="date" value="${tr._eventOriginal.date}" style="padding:7px 8px;border-radius:8px;border:1px solid #cfd8eb;min-width:145px;">`;
+    tr.querySelector(".event-col-title").innerHTML = `<input type="text" value="${tr._eventOriginal.title.replace(/"/g, "&quot;")}" style="padding:7px 8px;border-radius:8px;border:1px solid #cfd8eb;width:100%;">`;
+    tr.querySelector(".event-col-type").innerHTML = `
+        <select style="padding:7px 8px;border-radius:8px;border:1px solid #cfd8eb;">
+            <option value="general" ${tr._eventOriginal.type === "general" ? "selected" : ""}>General</option>
+            <option value="test" ${tr._eventOriginal.type === "test" ? "selected" : ""}>Test</option>
+            <option value="exam" ${tr._eventOriginal.type === "exam" ? "selected" : ""}>Exam</option>
+            <option value="vacation" ${tr._eventOriginal.type === "vacation" ? "selected" : ""}>Holiday / Leave</option>
+        </select>
+    `;
+    tr.querySelector(".event-col-important").innerHTML = `
+        <select style="padding:7px 8px;border-radius:8px;border:1px solid #cfd8eb;">
+            <option value="no" ${tr._eventOriginal.important ? "" : "selected"}>No</option>
+            <option value="yes" ${tr._eventOriginal.important ? "selected" : ""}>Yes</option>
+        </select>
+    `;
+    tr.querySelector(".event-col-action").innerHTML = `
+        <button type="button" class="action-btn approve" style="border:none;cursor:pointer;" onclick="saveInlineEventEdit(this)">Save</button>
+        <button type="button" class="action-btn" style="border:none;background:#64748b;color:#fff;cursor:pointer;" onclick="cancelInlineEventEdit(this)">Cancel</button>
+    `;
+}
+
+function cancelInlineEventEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || !tr._eventOriginal) return;
+    renderAdminEventRow(tr, tr._eventOriginal);
+}
+
+function saveInlineEventEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || !tr._eventOriginal) return;
+
+    const date = tr.querySelector(".event-col-date input").value;
+    const title = tr.querySelector(".event-col-title input").value.trim();
+    const eventType = tr.querySelector(".event-col-type select").value;
+    const important = tr.querySelector(".event-col-important select").value;
+
+    if (!date || !title) return;
+
+    const body = new URLSearchParams({
+        id: tr._eventOriginal.id,
+        date,
+        title,
+        event_type: eventType,
+        important
+    }).toString();
+
+    fetch("/admin/events/update_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (!res.ok) throw new Error(res.error || "Update failed");
+        renderAdminEventRow(tr, res.event);
+        if (adminCalendar) adminCalendar.refetchEvents();
+    })
+    .catch((err) => {
+        setAdminCalendarNote(err.message || "No more than 3 shared events are allowed on this date.", "error");
+        cancelInlineEventEdit(btn);
+    });
+}
+
+function buildAdminTimetableActionHtml(row) {
+    const deleteParams = new URLSearchParams({
+        day: row.day || "",
+        slot: row.slot || "",
+        subject: row.subject || "",
+        room: row.room || "",
+        teacher: row.teacher || "",
+        target: row.target || "ALL"
+    }).toString();
+
+    const labelParams = new URLSearchParams({
+        day: row.day || "",
+        slot: row.slot || "",
+        subject: row.subject || "",
+        room: row.room || "",
+        teacher: row.teacher || "",
+        target: row.target || "ALL"
+    });
+
+    const deleteHref = `/admin/timetable/delete?${deleteParams}`;
+    let labelBtn = "";
+    if ((row.label || "") === "Teacher Absent") {
+        labelParams.append("clear", "1");
+        labelBtn = `<a class="action-btn" style="background:#475569;color:#fff;" href="/admin/timetable/label_absent?${labelParams.toString()}">Clear Label</a>`;
+    } else {
+        labelBtn = `<a class="action-btn" style="background:#f59e0b;color:#fff;" href="/admin/timetable/label_absent?${labelParams.toString()}">Mark Absent</a>`;
+    }
+
+    return `
+        <div class="tt-actions">
+            <a class="action-btn reject" href="${deleteHref}">Delete</a>
+            ${labelBtn}
+            <button type="button" class="action-btn" style="border:none;background:#0ea5e9;color:#fff;cursor:pointer;" onclick="startAdminInlineEdit(this)">Edit</button>
+        </div>
+    `;
+}
+
+function renderAdminTimetableRow(tr, row) {
+    tr.dataset.day = row.day || "";
+    tr.dataset.slot = row.slot || "";
+    tr.dataset.subject = row.subject || "";
+    tr.dataset.teacher = row.teacher || "";
+    tr.dataset.room = row.room || "";
+    tr.dataset.target = row.target || "ALL";
+    tr.dataset.label = row.label || "";
+    tr.dataset.editing = "0";
+    tr._originalData = null;
+
+    const tds = tr.querySelectorAll("td");
+    tds[0].textContent = row.day || "";
+    tds[1].textContent = row.slot || "";
+    tds[2].textContent = row.subject || "";
+    tds[3].textContent = row.teacher || "";
+    tds[4].textContent = row.room || "";
+    tds[5].textContent = row.target || "ALL";
+    tds[6].textContent = row.label ? row.label : "-";
+    tds[7].innerHTML = buildAdminTimetableActionHtml(row);
+    applyAdminDayFilter();
+}
+
+function startAdminInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || tr.dataset.editing === "1") return;
+    tr.dataset.editing = "1";
+
+    const data = {
+        day: tr.dataset.day || "",
+        slot: tr.dataset.slot || "",
+        subject: tr.dataset.subject || "",
+        teacher: tr.dataset.teacher || "",
+        room: tr.dataset.room || "",
+        target: tr.dataset.target || "ALL",
+        label: tr.dataset.label || ""
+    };
+    tr._originalData = data;
+
+    const tds = tr.querySelectorAll("td");
+    tds[0].innerHTML = `<select class="tt-inline-select"><option ${data.day==="Mon"?"selected":""}>Mon</option><option ${data.day==="Tue"?"selected":""}>Tue</option><option ${data.day==="Wed"?"selected":""}>Wed</option><option ${data.day==="Thu"?"selected":""}>Thu</option><option ${data.day==="Fri"?"selected":""}>Fri</option></select>`;
+    tds[1].innerHTML = `<select class="tt-inline-select"><option ${data.slot==="S1"?"selected":""}>S1</option><option ${data.slot==="S2"?"selected":""}>S2</option><option ${data.slot==="S3"?"selected":""}>S3</option><option ${data.slot==="S4"?"selected":""}>S4</option></select>`;
+    tds[2].innerHTML = `<input class="tt-inline-input" type="text" value="${data.subject.replace(/"/g, "&quot;")}">`;
+    tds[3].innerHTML = `<input class="tt-inline-input" type="text" value="${data.teacher.replace(/"/g, "&quot;")}">`;
+    tds[4].innerHTML = `<input class="tt-inline-input" type="text" value="${data.room.replace(/"/g, "&quot;")}">`;
+    tds[5].innerHTML = `<select class="tt-inline-select"><option ${data.target==="ALL"?"selected":""}>ALL</option><option ${data.target==="CSE"?"selected":""}>CSE</option><option ${data.target==="ECE"?"selected":""}>ECE</option><option ${data.target==="IT"?"selected":""}>IT</option><option ${data.target==="ME"?"selected":""}>ME</option></select>`;
+    tds[6].innerHTML = `<input class="tt-inline-input" type="text" value="${data.label.replace(/"/g, "&quot;")}">`;
+    tds[7].innerHTML = `
+        <div class="tt-actions">
+            <button type="button" class="action-btn approve" style="border:none;cursor:pointer;" onclick="saveAdminInlineEdit(this)">Save</button>
+            <button type="button" class="action-btn" style="border:none;background:#64748b;color:#fff;cursor:pointer;" onclick="cancelAdminInlineEdit(this)">Cancel</button>
+        </div>
+    `;
+}
+
+function cancelAdminInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || !tr._originalData) return;
+    renderAdminTimetableRow(tr, tr._originalData);
+}
+
+function saveAdminInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    const oldData = tr && tr._originalData ? tr._originalData : null;
+    if (!tr || !oldData) return;
+
+    const tds = tr.querySelectorAll("td");
+    const newData = {
+        day: tds[0].querySelector("select").value,
+        slot: tds[1].querySelector("select").value,
+        subject: tds[2].querySelector("input").value.trim(),
+        teacher: tds[3].querySelector("input").value.trim(),
+        room: tds[4].querySelector("input").value.trim(),
+        target: tds[5].querySelector("select").value,
+        label: tds[6].querySelector("input").value.trim()
+    };
+
+    if (!newData.subject || !newData.teacher || !newData.room) return;
+
+    const body = new URLSearchParams({
+        old_day: oldData.day,
+        old_slot: oldData.slot,
+        old_subject: oldData.subject,
+        old_teacher: oldData.teacher,
+        old_room: oldData.room,
+        old_target: oldData.target,
+        day: newData.day,
+        slot: newData.slot,
+        subject: newData.subject,
+        teacher: newData.teacher,
+        room: newData.room,
+        target: newData.target,
+        label: newData.label
+    }).toString();
+
+    fetch("/admin/timetable/update_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+    }).then(r => r.json()).then(res => {
+        if (!res.ok) throw new Error(res.error || "Update failed");
+        renderAdminTimetableRow(tr, res.row);
+    }).catch(() => {
+        cancelAdminInlineEdit(btn);
+    });
+}
+
+function rowDataFromButton(btn) {
+    const tr = btn.closest("tr");
+    return {
+        tr,
+        day: tr.dataset.day || "",
+        slot: tr.dataset.slot || "",
+        subject: tr.dataset.subject || "",
+        teacher: tr.dataset.teacher || "",
+        room: tr.dataset.room || "",
+        target: tr.dataset.target || "ALL",
+        label: tr.dataset.label || ""
+    };
+}
+
+function deleteSnapshotRow(btn) {
+    const d = rowDataFromButton(btn);
+    btn.disabled = true;
+    fetch("/admin/timetable/delete_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `day=${encodeURIComponent(d.day)}&slot=${encodeURIComponent(d.slot)}&subject=${encodeURIComponent(d.subject)}&room=${encodeURIComponent(d.room)}&teacher=${encodeURIComponent(d.teacher)}&target=${encodeURIComponent(d.target)}`
+    }).then(r => r.json()).then(res => {
+        if (!res.ok) throw new Error(res.error || "Delete failed");
+        d.tr.remove();
+        applyAdminDayFilter();
+    }).catch(() => {
+        btn.disabled = false;
+    });
+}
+
+function startInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || tr.dataset.editing === "1") return;
+    tr.dataset.editing = "1";
+
+    const data = {
+        day: tr.dataset.day || "",
+        slot: tr.dataset.slot || "",
+        subject: tr.dataset.subject || "",
+        teacher: tr.dataset.teacher || "",
+        room: tr.dataset.room || "",
+        target: tr.dataset.target || "ALL",
+        label: tr.dataset.label || ""
+    };
+    tr._originalData = data;
+
+    const tds = tr.querySelectorAll("td");
+    tds[0].innerHTML = `<select><option ${data.day==="Mon"?"selected":""}>Mon</option><option ${data.day==="Tue"?"selected":""}>Tue</option><option ${data.day==="Wed"?"selected":""}>Wed</option><option ${data.day==="Thu"?"selected":""}>Thu</option><option ${data.day==="Fri"?"selected":""}>Fri</option></select>`;
+    tds[1].innerHTML = `<select><option ${data.slot==="S1"?"selected":""}>S1</option><option ${data.slot==="S2"?"selected":""}>S2</option><option ${data.slot==="S3"?"selected":""}>S3</option><option ${data.slot==="S4"?"selected":""}>S4</option></select>`;
+    tds[2].innerHTML = `<input type="text" value="${data.subject.replace(/"/g, "&quot;")}">`;
+    tds[3].innerHTML = `<input type="text" value="${data.teacher.replace(/"/g, "&quot;")}">`;
+    tds[4].innerHTML = `<input type="text" value="${data.room.replace(/"/g, "&quot;")}">`;
+    tds[5].innerHTML = `<select><option ${data.target==="ALL"?"selected":""}>ALL</option><option ${data.target==="CSE"?"selected":""}>CSE</option><option ${data.target==="ECE"?"selected":""}>ECE</option><option ${data.target==="IT"?"selected":""}>IT</option><option ${data.target==="ME"?"selected":""}>ME</option></select>`;
+    tds[6].innerHTML = `<input type="text" value="${data.label.replace(/"/g, "&quot;")}">`;
+    tds[7].innerHTML = `
+        <button type="button" class="gen-action" style="background:#2563eb;color:#fff;" onclick="saveInlineEdit(this)">Save</button>
+        <button type="button" class="gen-action edit" onclick="cancelInlineEdit(this)">Cancel</button>
+    `;
+}
+
+function cancelInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    if (!tr || !tr._originalData) return;
+    renderSnapshotRow(tr, tr._originalData);
+}
+
+function saveInlineEdit(btn) {
+    const tr = btn.closest("tr");
+    const oldData = tr._originalData;
+    if (!tr || !oldData) return;
+    const tds = tr.querySelectorAll("td");
+    const newData = {
+        day: tds[0].querySelector("select").value,
+        slot: tds[1].querySelector("select").value,
+        subject: tds[2].querySelector("input").value.trim(),
+        teacher: tds[3].querySelector("input").value.trim(),
+        room: tds[4].querySelector("input").value.trim(),
+        target: tds[5].querySelector("select").value,
+        label: tds[6].querySelector("input").value.trim()
+    };
+
+    if (!newData.subject || !newData.teacher || !newData.room) {
+        return;
+    }
+
+    const body = new URLSearchParams({
+        old_day: oldData.day,
+        old_slot: oldData.slot,
+        old_subject: oldData.subject,
+        old_teacher: oldData.teacher,
+        old_room: oldData.room,
+        old_target: oldData.target,
+        day: newData.day,
+        slot: newData.slot,
+        subject: newData.subject,
+        teacher: newData.teacher,
+        room: newData.room,
+        target: newData.target,
+        label: newData.label
+    }).toString();
+
+    fetch("/admin/timetable/update_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+    }).then(r => r.json()).then(res => {
+        if (!res.ok) throw new Error(res.error || "Update failed");
+        renderSnapshotRow(tr, res.row);
+    }).catch(() => {});
+}
+
+function renderSnapshotRow(tr, row) {
+    tr.dataset.day = row.day;
+    tr.dataset.slot = row.slot;
+    tr.dataset.subject = row.subject;
+    tr.dataset.teacher = row.teacher;
+    tr.dataset.room = row.room;
+    tr.dataset.target = row.target;
+    tr.dataset.label = row.label || "";
+    tr.dataset.editing = "0";
+    tr._originalData = null;
+
+    const tds = tr.querySelectorAll("td");
+    tds[0].textContent = row.day;
+    tds[1].textContent = row.slot;
+    tds[2].textContent = row.subject;
+    tds[3].textContent = row.teacher;
+    tds[4].textContent = row.room;
+    tds[5].textContent = row.target;
+    tds[6].textContent = row.label ? row.label : "-";
+    tds[7].innerHTML = `
+        <button type="button" class="gen-action del" onclick="deleteSnapshotRow(this)">Delete</button>
+        <button type="button" class="gen-action edit" onclick="startInlineEdit(this)">Edit</button>
+    `;
+    applyAdminDayFilter();
+}
+
+function openSnapshotEdit(btn) {
+    const d = rowDataFromButton(btn);
+    document.getElementById("edit_old_day").value = d.day;
+    document.getElementById("edit_old_slot").value = d.slot;
+    document.getElementById("edit_old_subject").value = d.subject;
+    document.getElementById("edit_old_teacher").value = d.teacher;
+    document.getElementById("edit_old_room").value = d.room;
+    document.getElementById("edit_old_target").value = d.target;
+
+    document.getElementById("edit_day").value = d.day;
+    document.getElementById("edit_slot").value = d.slot;
+    document.getElementById("edit_subject").value = d.subject;
+    document.getElementById("edit_teacher").value = d.teacher;
+    document.getElementById("edit_room").value = d.room;
+    document.getElementById("edit_target").value = d.target;
+    document.getElementById("edit_label").value = d.label;
+
+    const form = document.getElementById("snapshotEditForm");
+    form.dataset.editingRow = "";
+    form._editingRow = d.tr;
+    document.getElementById("snapshotEditModal").classList.add("show");
+}
+
+function closeSnapshotEdit() {
+    document.getElementById("snapshotEditModal").classList.remove("show");
+}
+
+document.getElementById("snapshotEditForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const tr = form._editingRow;
+    const body = new URLSearchParams(new FormData(form)).toString();
+    fetch("/admin/timetable/update_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+    }).then(r => r.json()).then(res => {
+        if (!res.ok) throw new Error(res.error || "Update failed");
+        const row = res.row;
+        tr.dataset.day = row.day;
+        tr.dataset.slot = row.slot;
+        tr.dataset.subject = row.subject;
+        tr.dataset.teacher = row.teacher;
+        tr.dataset.room = row.room;
+        tr.dataset.target = row.target;
+        tr.dataset.label = row.label || "";
+
+        const tds = tr.querySelectorAll("td");
+        tds[0].textContent = row.day;
+        tds[1].textContent = row.slot;
+        tds[2].textContent = row.subject;
+        tds[3].textContent = row.teacher;
+        tds[4].textContent = row.room;
+        tds[5].textContent = row.target;
+        tds[6].textContent = row.label ? row.label : "-";
+        applyAdminDayFilter();
+        closeSnapshotEdit();
+    }).catch(() => {});
+});
+
+function applyAdminDayFilter() {
+    const dayFilter = document.getElementById("adminDayFilter");
+    if (!dayFilter) return;
+    const selectedDay = dayFilter.value || "ALL";
+    const mainRows = Array.from(document.querySelectorAll("#adminTimetableBodyMain tr"));
+    const snapshotRows = Array.from(document.querySelectorAll("#adminTimetableBodySnapshot tr"));
+
+    let mainVisible = 0;
+    const applyToRows = (rows) => {
+        rows.forEach((tr) => {
+            const rowDay = tr.dataset.day || "";
+            const match = selectedDay === "ALL" || rowDay === selectedDay;
+            tr.style.display = match ? "" : "none";
+            if (match && rows === mainRows) mainVisible += 1;
+        });
+    };
+
+    applyToRows(mainRows);
+    applyToRows(snapshotRows);
+
+    const countTag = document.getElementById("adminDayFilterCount");
+    if (countTag) {
+        countTag.textContent = `Showing ${mainVisible} row(s)`;
+    }
+}
+
+function initAdminDayFilter() {
+    const dayFilter = document.getElementById("adminDayFilter");
+    const resetBtn = document.getElementById("adminDayFilterReset");
+    if (!dayFilter || !resetBtn) return;
+
+    dayFilter.onchange = applyAdminDayFilter;
+    resetBtn.onclick = () => {
+        dayFilter.value = "ALL";
+        applyAdminDayFilter();
+    };
+
+    applyAdminDayFilter();
+}
+
+lucide.createIcons();
+updateLiveAdminHeader();
+setInterval(updateLiveAdminHeader, 60000);
+initAdminDayFilter();
+
+const params = new URLSearchParams(window.location.search);
+const msg = params.get("message") || "";
+const err = params.get("error") || "";
+const section = params.get("section") || "";
+if (section) {
+    showSection(section);
+} else if (msg.includes("Timetable generated") || err.includes("feasible") || err.includes("Timetable") || err.includes("ERROR:")) {
+    showSection("generate-section");
+}
+
+setTimeout(() => {
+    document.querySelectorAll(".notice").forEach(n => {
+        n.style.transition = "opacity 0.4s ease";
+        n.style.opacity = "0";
+        setTimeout(() => n.remove(), 450);
+    });
+}, 3500);
+</script>
+
+</body>
+</html>
+
+

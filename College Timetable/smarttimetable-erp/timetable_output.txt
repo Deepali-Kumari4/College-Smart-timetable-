@@ -1,0 +1,11 @@
+Wed,S1,Introduction to computer science,R3,Janhvi Tiwari,CSE
+Wed,S2,Introduction to computer science,R1,Janhvi Tiwari,CSE
+Thu,S3,Introduction to computer science,R1,Janhvi Tiwari,CSE
+Wed,S3,Embedded system,R4,Janhvi Tiwari,ECE
+Fri,S4,Embedded system,R2,Janhvi Tiwari,ECE
+Tue,S1,Mac Layer protocol,R3,Janhvi Tiwari,CSE
+Thu,S2,Mac Layer protocol,R4,Janhvi Tiwari,CSE
+Fri,S2,Mac Layer protocol,R3,Janhvi Tiwari,CSE
+Mon,S1,Engineering Mathematics (Core Foundation),R2,Arnav Ghosh,CSE
+Wed,S3,Engineering Mathematics (Core Foundation),R1,Arnav Ghosh,CSE
+Fri,S4,Engineering Mathematics (Core Foundation),R3,Arnav Ghosh,CSE

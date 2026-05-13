@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Course Details</title>
+</head>
+<body>
+
+<h2>Edit Course: {{ course }}</h2>
+
+<form method="POST" action="/teacher/update">
+
+    <!-- Hidden field (course identity) -->
+    <input type="hidden" name="course" value="{{ course }}">
+
+    <p>
+        <label>Students:</label><br>
+        <input type="number" name="students" value="{{ students }}" required>
+    </p>
+
+    <p>
+        <label>Preference 1 (Day:Slot):</label><br>
+        <input type="text" name="p1" value="{{ prefs[0] }}">
+    </p>
+
+    <p>
+        <label>Preference 2 (Day:Slot):</label><br>
+        <input type="text" name="p2" value="{{ prefs[1] }}">
+    </p>
+
+    <p>
+        <label>Preference 3 (Day:Slot):</label><br>
+        <input type="text" name="p3" value="{{ prefs[2] }}">
+    </p>
+
+    <button type="submit">Update</button>
+
+</form>
+
+</body>
+</html>

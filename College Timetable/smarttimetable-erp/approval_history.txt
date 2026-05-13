@@ -1,0 +1,7 @@
+2026-02-16 12:38:53,approved,cs22b1010@iiitr.ac.in,Aryan,CSE,student,admin@iiitr.ac.in
+2026-02-16 16:57:02,approved,cs22b1012@iiitr.ac.in,Ashish Kumar Arya,CSE,student,admin@iiitr.ac.in
+2026-03-24 22:12:39,approved,Arnav@iiitr.ac.in,Arnav Ghosh,MNC,teacher,admin@iiitr.ac.in
+2026-04-08 20:01:49,approved,deepali@gmail.com,Deepali Kumari,IT,student,admin@iiitr.ac.in
+2026-04-08 20:03:45,approved,sejal@gmail.com,Sejal Raj,IT,student,admin@iiitr.ac.in
+2026-04-11 11:57:36,approved,raju@gmail.com,Raju Sir,IT,teacher,admin@iiitr.ac.in
+2026-04-11 12:11:48,approved,ram@gmail.com,Ram Kumar,IT,student,admin@iiitr.ac.in
